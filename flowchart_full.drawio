@@ -1,0 +1,121 @@
+<mxfile host="65bd71144e">
+    <diagram name="Flowchart" id="0">
+        <mxGraphModel dx="1719" dy="546" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="start" value="เริ่มต้นระบบ" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="40" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="create_bin" value="สร้างไฟล์ Binary" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="100" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="main_menu" value="แสดงเมนูหลัก" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="160" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="menu_select" value="เลือกเมนู" style="shape=rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="220" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="menu_book" value="เมนูหนังสือ" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="320" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="menu_member" value="เมนูสมาชิก" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="320" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="menu_stat" value="คำนวณสถิติ" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="320" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="menu_exit" value="จบการทำงาน" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="640" y="320" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="crud" value="CRUD หนังสือ" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="400" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="add_book" value="1. เพิ่ม" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-10" y="400" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="edit_book" value="3. แก้ไข" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="170" y="540" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="del_book" value="ลบ" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="540" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pack_struct" value="Pack struct" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-30" y="590" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="write_dat" value="บันทึกลง books.dat" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="690" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="crud_member" value="CRUD สมาชิก" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="410" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="check_member" value="ตรวจสอบสมาชิก" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="270" y="490" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="save_member" value="บันทึกการยืม" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="270" y="590" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stat_show" value="แสดงผลสถิติ" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="470" y="420" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="write_txt" value="เขียนไฟล์ TXT" style="shape=rectangle;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="470" y="510" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="start" target="create_bin" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="create_bin" target="main_menu" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="main_menu" target="menu_select" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="menu_select" target="menu_book" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="menu_select" target="menu_member" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="menu_select" target="menu_stat" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="menu_select" target="menu_exit" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="menu_book" target="crud" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="crud" target="add_book" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="crud" target="edit_book" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="crud" target="del_book" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="add_book" target="pack_struct" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="pack_struct" target="write_dat" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="menu_member" target="crud_member" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="crud_member" target="check_member" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="check_member" target="save_member" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="menu_stat" target="stat_show" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="stat_show" target="write_txt" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
