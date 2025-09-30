@@ -623,20 +623,23 @@ class LibrarySystem:
 
     # === BORROW MANAGEMENT ===
     def add_borrow(self):
-        """เพิ่มรายการยืม"""
+        """เพิ่มรายการยืม - รองรับการยืมหลายเล่ม"""
         print("\n=== ยืมหนังสือ ===")
         try:
-            book_id = input("กรอก ID หนังสือ: ").strip()
-            member_id = input("กรอก ID สมาชิก: ").strip()
+            # ถามจำนวนหนังสือที่ต้องการยืม
+            num_books_input = input("ต้องการยืมกี่เล่ม? (1-10): ").strip()
             
-            # ตรวจสอบว่าหนังสือมีอยู่และว่าง
-            book = self._find_book_by_id(book_id)
-            if not book:
-                print("❌ ไม่พบหนังสือ")
+            try:
+                num_books = int(num_books_input)
+                if num_books < 1 or num_books > 10:
+                    print("❌ กรุณากรอกจำนวน 1-10 เล่มเท่านั้น")
+                    return
+            except ValueError:
+                print("❌ กรุณากรอกตัวเลขที่ถูกต้อง")
                 return
-            if book[5] != b'A':  # ไม่ว่าง
-                print("❌ หนังสือถูกยืมแล้ว")
-                return
+            
+            # ถามข้อมูลสมาชิกครั้งเดียว
+            member_id = input("กรอก ID สมาชิก: ").strip()
             
             # ตรวจสอบว่าสมาชิกมีอยู่
             member = self._find_member_by_id(member_id)
@@ -644,32 +647,104 @@ class LibrarySystem:
                 print("❌ ไม่พบสมาชิก")
                 return
             
-            borrow_id = self._get_next_id(self.borrows_file, self.borrow_size)
-            borrow_date = datetime.date.today().strftime("%Y-%m-%d")
+            print(f"\nผู้ยืม: {self._decode_string(member[1])}")
+            print(f"จำนวนหนังสือที่จะยืม: {num_books} เล่ม")
+            print("-" * 50)
             
-            borrow_data = struct.pack(
-                self.borrow_format,
-                self._encode_string(borrow_id, 4),
-                self._encode_string(book_id, 4),
-                self._encode_string(member_id, 4),
-                self._encode_string(borrow_date, 10),
-                self._encode_string("", 10),  # return_date ว่าง
-                b'B',  # Borrowed
-                b'0'   # Not deleted
-            )
+            # เก็บรายการหนังสือที่ยืมสำเร็จ
+            borrowed_books = []
             
-            with open(self.borrows_file, 'ab') as f:
-                f.write(borrow_data)
+            # วนลูปให้กรอก ID หนังสือตามจำนวนที่ต้องการ
+            for i in range(1, num_books + 1):
+                print(f"\n📖 หนังสือเล่มที่ {i}/{num_books}")
+                book_id = input(f"กรอก ID หนังสือเล่มที่ {i}: ").strip()
+                
+                # ตรวจสอบว่าหนังสือมีอยู่และว่าง
+                book = self._find_book_by_id(book_id)
+                if not book:
+                    print(f"❌ ไม่พบหนังสือ ID: {book_id}")
+                    
+                    # ถามว่าต้องการดำเนินการต่อหรือไม่
+                    continue_choice = input("ต้องการกรอก ID ใหม่หรือข้าม? (r=ใหม่, s=ข้าม, c=ยกเลิกทั้งหมด): ").strip().lower()
+                    
+                    if continue_choice == 'r':
+                        i -= 1  # ลองกรอกใหม่
+                        continue
+                    elif continue_choice == 'c':
+                        print("❌ ยกเลิกการยืมทั้งหมด")
+                        return
+                    else:  # skip
+                        continue
+                
+                if book[5] != b'A':  # ไม่ว่าง
+                    print(f"❌ หนังสือ '{self._decode_string(book[1])}' ถูกยืมแล้ว")
+                    
+                    continue_choice = input("ต้องการกรอก ID ใหม่หรือข้าม? (r=ใหม่, s=ข้าม, c=ยกเลิกทั้งหมด): ").strip().lower()
+                    
+                    if continue_choice == 'r':
+                        i -= 1
+                        continue
+                    elif continue_choice == 'c':
+                        print("❌ ยกเลิกการยืมทั้งหมด")
+                        # ยกเลิกหนังสือที่ยืมไปแล้ว
+                        for prev_book_id in borrowed_books:
+                            self._update_book_status(prev_book_id, b'A')
+                        return
+                    else:
+                        continue
+                
+                # ตรวจสอบว่าไม่ได้ยืมหนังสือเล่มเดิมซ้ำ
+                if book_id in borrowed_books:
+                    print(f"❌ คุณเลือกหนังสือเล่มนี้ไปแล้ว")
+                    i -= 1
+                    continue
+                
+                # ยืมหนังสือ
+                borrow_id = self._get_next_id(self.borrows_file, self.borrow_size)
+                borrow_date = datetime.date.today().strftime("%Y-%m-%d")
+                
+                borrow_data = struct.pack(
+                    self.borrow_format,
+                    self._encode_string(borrow_id, 4),
+                    self._encode_string(book_id, 4),
+                    self._encode_string(member_id, 4),
+                    self._encode_string(borrow_date, 10),
+                    self._encode_string("", 10),  # return_date ว่าง
+                    b'B',  # Borrowed
+                    b'0'   # Not deleted
+                )
+                
+                with open(self.borrows_file, 'ab') as f:
+                    f.write(borrow_data)
+                
+                # อัพเดทสถานะหนังสือเป็น 'ถูกยืม'
+                self._update_book_status(book_id, b'B')
+                
+                # เพิ่มในรายการที่ยืมสำเร็จ
+                borrowed_books.append(book_id)
+                
+                print(f"✅ บันทึกการยืมเรียบร้อย ID: {borrow_id}")
+                print(f"   หนังสือ: {self._decode_string(book[1])}")
             
-            # อัพเดทสถานะหนังสือเป็น 'ถูกยืม'
-            self._update_book_status(book_id, b'B')
-            
-            print(f"✅ บันทึกการยืมเรียบร้อย ID: {borrow_id}")
-            print(f"หนังสือ: {self._decode_string(book[1])}")
+            # สรุปผลการยืม
+            print("\n" + "=" * 50)
+            print(f"✅ สรุปการยืมหนังสือ")
             print(f"ผู้ยืม: {self._decode_string(member[1])}")
             print(f"วันที่ยืม: {borrow_date}")
+            print(f"จำนวนหนังสือที่ยืมสำเร็จ: {len(borrowed_books)} เล่ม")
             
-            self.operation_history.append(f"{datetime.datetime.now()}: ยืมหนังสือ ID: {book_id} โดยสมาชิก ID: {member_id}")
+            if len(borrowed_books) > 0:
+                print("\nรายการหนังสือที่ยืม:")
+                for idx, book_id in enumerate(borrowed_books, 1):
+                    book = self._find_book_by_id(book_id)
+                    if book:
+                        print(f"  {idx}. {self._decode_string(book[1])} (ID: {book_id})")
+                
+                self.operation_history.append(
+                    f"{datetime.datetime.now()}: ยืมหนังสือ {len(borrowed_books)} เล่ม โดยสมาชิก ID: {member_id}"
+                )
+            
+            print("=" * 50)
             
         except Exception as e:
             print(f"❌ เกิดข้อผิดพลาด: {e}")
