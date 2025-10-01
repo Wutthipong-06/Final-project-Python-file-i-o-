@@ -18,17 +18,13 @@ class LibrarySystem:
         self.book_format = '4s100s50s20s4s1s1s'
         self.book_size = struct.calcsize(self.book_format)
         
-        # สมาชิก: id(4), name(50), email(50), phone(15), join_date(10), status(1), deleted(1), ban_until(10)
-        self.member_format = '4s50s50s15s10s1s1s10s'
+        # สมาชิก: id(4), name(50), email(50), phone(15), join_date(10), status(1), deleted(1)
+        self.member_format = '4s50s50s15s10s1s1s'
         self.member_size = struct.calcsize(self.member_format)
         
-        # รายการยืม: id(4), book_id(4), member_id(4), borrow_date(10), return_date(10), due_date(10), status(1), deleted(1)
-        self.borrow_format = '4s4s4s10s10s10s1s1s'
+        # รายการยืม: id(4), book_id(4), member_id(4), borrow_date(10), return_date(10), status(1), deleted(1)
+        self.borrow_format = '4s4s4s10s10s1s1s'
         self.borrow_size = struct.calcsize(self.borrow_format)
-        
-        # ค่าคงที่
-        self.BORROW_DAYS = 7  # จำนวนวันที่ให้ยืม
-        self.BAN_DAYS = 30  # จำนวนวันที่ถูก Ban
         
         # ชื่อไฟล์
         self.books_file = 'books.dat'
@@ -391,8 +387,7 @@ class LibrarySystem:
                 self._encode_string(phone, 15),
                 self._encode_string(join_date, 10),
                 b'A',  # Active
-                b'0',  # Not deleted
-                self._encode_string("", 10)  # ban_until (ว่าง = ไม่ถูก ban)
+                b'0'   # Not deleted
             )
             
             with open(self.members_file, 'ab') as f:
@@ -503,19 +498,6 @@ class LibrarySystem:
         phone = self._decode_string(member[3])
         join_date = self._decode_string(member[4])
         status = 'ใช้งาน' if member[5] == b'A' else 'ระงับ'
-        ban_until = self._decode_string(member[7])
-        
-        # ตรวจสอบสถานะ Ban
-        if ban_until:
-            try:
-                ban_date = datetime.datetime.strptime(ban_until, "%Y-%m-%d").date()
-                today = datetime.date.today()
-                if ban_date > today:
-                    status = f'ถูก Ban ถึง {ban_until}'
-                else:
-                    status = 'ใช้งาน (Ban หมดอายุ)'
-            except:
-                pass
         
         if compact:
             print(f"ID: {member_id} | {name[:25]:<25} | {email[:30]:<30} | {status}")
@@ -526,8 +508,6 @@ class LibrarySystem:
             print(f"โทรศัพท์: {phone}")
             print(f"วันที่สมัคร: {join_date}")
             print(f"สถานะ: {status}")
-            if ban_until and datetime.datetime.strptime(ban_until, "%Y-%m-%d").date() > datetime.date.today():
-                print(f"⚠️ ถูก Ban จนถึง: {ban_until}")
             print("-" * 50)
 
     def update_member(self):
@@ -571,8 +551,7 @@ class LibrarySystem:
             self._encode_string(phone, 15),
             member[4],  # join_date เดิม
             member[5],  # สถานะเดิม
-            member[6],  # deleted flag เดิม
-            member[7]   # ban_until เดิม
+            member[6]   # deleted flag เดิม
         )
         
         self._update_record(self.members_file, member_index, updated_member, self.member_size)
@@ -606,8 +585,7 @@ class LibrarySystem:
         deleted_member = struct.pack(
             self.member_format,
             member[0], member[1], member[2], member[3], member[4], member[5],
-            b'1',      # ตั้งค่า deleted = 1
-            member[7]  # ban_until เดิม
+            b'1'  # ตั้งค่า deleted = 1
         )
         
         self._update_record(self.members_file, member_index, deleted_member, self.member_size)
@@ -660,43 +638,22 @@ class LibrarySystem:
                 print("❌ หนังสือถูกยืมแล้ว")
                 return
             
-            # ตรวจสอบว่าสมาชิกมีอยู่และไม่ถูก Ban
+            # ตรวจสอบว่าสมาชิกมีอยู่
             member = self._find_member_by_id(member_id)
             if not member:
                 print("❌ ไม่พบสมาชิก")
                 return
             
-            # ตรวจสอบสถานะ Ban
-            ban_until = self._decode_string(member[7])
-            if ban_until:
-                try:
-                    ban_date = datetime.datetime.strptime(ban_until, "%Y-%m-%d").date()
-                    today = datetime.date.today()
-                    if ban_date > today:
-                        print(f"❌ สมาชิกถูก Ban จนถึง {ban_until}")
-                        print(f"   เหลืออีก {(ban_date - today).days} วัน")
-                        return
-                    else:
-                        # Ban หมดอายุแล้ว ให้ล้าง ban_until
-                        self._clear_member_ban(member_id)
-                except:
-                    pass
-            
             borrow_id = self._get_next_id(self.borrows_file, self.borrow_size)
-            borrow_date = datetime.date.today()
-            due_date = borrow_date + datetime.timedelta(days=self.BORROW_DAYS)
-            
-            borrow_date_str = borrow_date.strftime("%Y-%m-%d")
-            due_date_str = due_date.strftime("%Y-%m-%d")
+            borrow_date = datetime.date.today().strftime("%Y-%m-%d")
             
             borrow_data = struct.pack(
                 self.borrow_format,
                 self._encode_string(borrow_id, 4),
                 self._encode_string(book_id, 4),
                 self._encode_string(member_id, 4),
-                self._encode_string(borrow_date_str, 10),
+                self._encode_string(borrow_date, 10),
                 self._encode_string("", 10),  # return_date ว่าง
-                self._encode_string(due_date_str, 10),  # due_date
                 b'B',  # Borrowed
                 b'0'   # Not deleted
             )
@@ -710,11 +667,9 @@ class LibrarySystem:
             print(f"✅ บันทึกการยืมเรียบร้อย ID: {borrow_id}")
             print(f"หนังสือ: {self._decode_string(book[1])}")
             print(f"ผู้ยืม: {self._decode_string(member[1])}")
-            print(f"วันที่ยืม: {borrow_date_str}")
-            print(f"📅 กำหนดคืน: {due_date_str} ({self.BORROW_DAYS} วัน)")
-            print(f"⚠️ หากไม่คืนตามกำหนด จะถูก Ban {self.BAN_DAYS} วัน")
+            print(f"วันที่ยืม: {borrow_date}")
             
-            self.operation_history.append(f"{datetime.datetime.now()}: ยืมหนังสือ ID: {book_id} โดยสมาชิก ID: {member_id}, กำหนดคืน: {due_date_str}")
+            self.operation_history.append(f"{datetime.datetime.now()}: ยืมหนังสือ ID: {book_id} โดยสมาชิก ID: {member_id}")
             
         except Exception as e:
             print(f"❌ เกิดข้อผิดพลาด: {e}")
@@ -732,24 +687,7 @@ class LibrarySystem:
                 return
             
             borrow_index, borrow_data = borrow_record
-            return_date = datetime.date.today()
-            return_date_str = return_date.strftime("%Y-%m-%d")
-            
-            # ตรวจสอบว่าคืนเกินกำหนดหรือไม่
-            due_date_str = self._decode_string(borrow_data[5])
-            borrow_date_str = self._decode_string(borrow_data[3])
-            member_id = self._decode_string(borrow_data[2])
-            
-            is_late = False
-            days_late = 0
-            
-            try:
-                due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%d").date()
-                if return_date > due_date:
-                    is_late = True
-                    days_late = (return_date - due_date).days
-            except:
-                pass
+            return_date = datetime.date.today().strftime("%Y-%m-%d")
             
             # อัพเดทรายการยืม
             updated_borrow = struct.pack(
@@ -758,10 +696,9 @@ class LibrarySystem:
                 borrow_data[1],  # book_id
                 borrow_data[2],  # member_id
                 borrow_data[3],  # borrow_date
-                self._encode_string(return_date_str, 10),  # return_date
-                borrow_data[5],  # due_date
+                self._encode_string(return_date, 10),  # return_date
                 b'R',  # Returned
-                borrow_data[7]   # deleted flag
+                borrow_data[6]   # deleted flag
             )
             
             self._update_record(self.borrows_file, borrow_index, updated_borrow, self.borrow_size)
@@ -769,30 +706,17 @@ class LibrarySystem:
             # อัพเดทสถานะหนังสือเป็น 'ว่าง'
             self._update_book_status(book_id, b'A')
             
-            # ถ้าคืนช้า ให้ Ban สมาชิก
-            if is_late:
-                ban_until_date = return_date + datetime.timedelta(days=self.BAN_DAYS)
-                self._ban_member(member_id, ban_until_date)
-            
             # แสดงข้อมูล
             book = self._find_book_by_id(book_id)
-            member = self._find_member_by_id(member_id)
+            member = self._find_member_by_id(self._decode_string(borrow_data[2]))
             
             print("✅ คืนหนังสือเรียบร้อย")
             print(f"หนังสือ: {self._decode_string(book[1])}")
             print(f"ผู้ยืม: {self._decode_string(member[1])}")
-            print(f"วันที่ยืม: {borrow_date_str}")
-            print(f"กำหนดคืน: {due_date_str}")
-            print(f"วันที่คืน: {return_date_str}")
+            print(f"วันที่ยืม: {self._decode_string(borrow_data[3])}")
+            print(f"วันที่คืน: {return_date}")
             
-            if is_late:
-                ban_until_str = ban_until_date.strftime("%Y-%m-%d")
-                print(f"\n⚠️ คืนหนังสือเกินกำหนด {days_late} วัน!")
-                print(f"🚫 สมาชิกถูก Ban จนถึง: {ban_until_str} ({self.BAN_DAYS} วัน)")
-                self.operation_history.append(f"{datetime.datetime.now()}: คืนหนังสือ ID: {book_id} (เกินกำหนด {days_late} วัน) - Ban สมาชิก ID: {member_id} ถึง {ban_until_str}")
-            else:
-                print(f"\n✅ คืนตามกำหนด")
-                self.operation_history.append(f"{datetime.datetime.now()}: คืนหนังสือ ID: {book_id}")
+            self.operation_history.append(f"{datetime.datetime.now()}: คืนหนังสือ ID: {book_id}")
             
         except Exception as e:
             print(f"❌ เกิดข้อผิดพลาด: {e}")
@@ -901,60 +825,10 @@ class LibrarySystem:
                     break
                 borrow = struct.unpack(self.borrow_format, data)
                 if (self._decode_string(borrow[1]) == book_id and 
-                    borrow[6] == b'B' and borrow[7] == b'0'):  # Borrowed และไม่ถูกลบ
+                    borrow[5] == b'B' and borrow[6] == b'0'):  # Borrowed และไม่ถูกลบ
                     return (index, borrow)
                 index += 1
         return None
-
-    def _ban_member(self, member_id: str, ban_until_date):
-        """Ban สมาชิก"""
-        member_index = self._find_member_index_by_id(member_id)
-        if member_index == -1:
-            return
-        
-        member = self._get_member_by_index(member_index)
-        if not member:
-            return
-        
-        ban_until_str = ban_until_date.strftime("%Y-%m-%d")
-        
-        updated_member = struct.pack(
-            self.member_format,
-            member[0],  # ID
-            member[1],  # name
-            member[2],  # email
-            member[3],  # phone
-            member[4],  # join_date
-            member[5],  # status
-            member[6],  # deleted
-            self._encode_string(ban_until_str, 10)  # ban_until
-        )
-        
-        self._update_record(self.members_file, member_index, updated_member, self.member_size)
-
-    def _clear_member_ban(self, member_id: str):
-        """ล้างสถานะ Ban ของสมาชิก"""
-        member_index = self._find_member_index_by_id(member_id)
-        if member_index == -1:
-            return
-        
-        member = self._get_member_by_index(member_index)
-        if not member:
-            return
-        
-        updated_member = struct.pack(
-            self.member_format,
-            member[0],  # ID
-            member[1],  # name
-            member[2],  # email
-            member[3],  # phone
-            member[4],  # join_date
-            member[5],  # status
-            member[6],  # deleted
-            self._encode_string("", 10)  # ล้าง ban_until
-        )
-        
-        self._update_record(self.members_file, member_index, updated_member, self.member_size)
 
     def _get_all_borrows(self) -> List:
         """ดึงรายการยืมทั้งหมด"""
@@ -978,22 +852,7 @@ class LibrarySystem:
         member_id = self._decode_string(borrow[2])
         borrow_date = self._decode_string(borrow[3])
         return_date = self._decode_string(borrow[4]) or "ยังไม่คืน"
-        due_date = self._decode_string(borrow[5])
-        status = "ยืมอยู่" if borrow[6] == b'B' else "คืนแล้ว"
-        
-        # ตรวจสอบว่าเกินกำหนดหรือไม่
-        is_overdue = False
-        days_overdue = 0
-        if borrow[6] == b'B' and due_date:  # ยืมอยู่
-            try:
-                due_dt = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
-                today = datetime.date.today()
-                if today > due_dt:
-                    is_overdue = True
-                    days_overdue = (today - due_dt).days
-                    status = f"⚠️ เกินกำหนด {days_overdue} วัน"
-            except:
-                pass
+        status = "ยืมอยู่" if borrow[5] == b'B' else "คืนแล้ว"
         
         # ดึงข้อมูลหนังสือและสมาชิก
         book = self._find_book_by_id(book_id)
@@ -1003,18 +862,14 @@ class LibrarySystem:
         member_name = self._decode_string(member[1]) if member else f"สมาชิก ID: {member_id}"
         
         if compact:
-            status_display = status[:30] if not is_overdue else f"⚠️ เกิน {days_overdue}วัน"
-            print(f"ID: {borrow_id} | {book_title[:30]:<30} | {member_name[:20]:<20} | {borrow_date} | {status_display}")
+            print(f"ID: {borrow_id} | {book_title[:30]:<30} | {member_name[:20]:<20} | {borrow_date} | {status}")
         else:
             print(f"รหัสการยืม: {borrow_id}")
             print(f"หนังสือ: {book_title}")
             print(f"ผู้ยืม: {member_name}")
             print(f"วันที่ยืม: {borrow_date}")
-            print(f"กำหนดคืน: {due_date}")
             print(f"วันที่คืน: {return_date}")
             print(f"สถานะ: {status}")
-            if is_overdue:
-                print(f"⚠️ เกินกำหนดไปแล้ว {days_overdue} วัน!")
             print("-" * 50)
 
     def _update_book_status(self, book_id: str, status: bytes):
@@ -1060,66 +915,20 @@ class LibrarySystem:
             return
         
         # ถ้ารายการยืมยังไม่คืน ให้อัพเดทสถานะหนังสือเป็นว่าง
-        if borrow[6] == b'B':
+        if borrow[5] == b'B':
             book_id = self._decode_string(borrow[1])
             self._update_book_status(book_id, b'A')
         
         # ตั้งค่า deleted flag
         deleted_borrow = struct.pack(
             self.borrow_format,
-            borrow[0], borrow[1], borrow[2], borrow[3], borrow[4], borrow[5], borrow[6],
+            borrow[0], borrow[1], borrow[2], borrow[3], borrow[4], borrow[5],
             b'1'  # ตั้งค่า deleted = 1
         )
         
         self._update_record(self.borrows_file, borrow_index, deleted_borrow, self.borrow_size)
         print("✅ ลบรายการยืมเรียบร้อย")
         self.operation_history.append(f"{datetime.datetime.now()}: ลบรายการยืม ID: {borrow_id}")
-
-    def check_overdue_books(self):
-        """ตรวจสอบหนังสือที่เกินกำหนดคืน"""
-        print("\n=== ตรวจสอบหนังสือเกินกำหนด ===")
-        
-        borrows = self._get_all_borrows()
-        active_borrows = [borrow for borrow in borrows if borrow[6] == b'B' and borrow[7] == b'0']
-        
-        overdue_list = []
-        today = datetime.date.today()
-        
-        for borrow in active_borrows:
-            due_date_str = self._decode_string(borrow[5])
-            if due_date_str:
-                try:
-                    due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%d").date()
-                    if today > due_date:
-                        days_overdue = (today - due_date).days
-                        overdue_list.append((borrow, days_overdue))
-                except:
-                    pass
-        
-        if not overdue_list:
-            print("✅ ไม่มีหนังสือเกินกำหนดคืน")
-            return
-        
-        print(f"⚠️ พบหนังสือเกินกำหนด {len(overdue_list)} รายการ")
-        print("-" * 100)
-        
-        for borrow, days_overdue in sorted(overdue_list, key=lambda x: x[1], reverse=True):
-            book_id = self._decode_string(borrow[1])
-            member_id = self._decode_string(borrow[2])
-            borrow_date = self._decode_string(borrow[3])
-            due_date = self._decode_string(borrow[5])
-            
-            book = self._find_book_by_id(book_id)
-            member = self._find_member_by_id(member_id)
-            
-            book_title = self._decode_string(book[1]) if book else f"หนังสือ ID: {book_id}"
-            member_name = self._decode_string(member[1]) if member else f"สมาชิก ID: {member_id}"
-            
-            print(f"📚 หนังสือ: {book_title[:40]}")
-            print(f"   ผู้ยืม: {member_name} (ID: {member_id})")
-            print(f"   วันที่ยืม: {borrow_date} | กำหนดคืน: {due_date}")
-            print(f"   ⚠️ เกินกำหนดไปแล้ว: {days_overdue} วัน")
-            print("-" * 100)
 
     def _find_borrow_index_by_id(self, borrow_id: str) -> int:
         """หา index ของรายการยืมจาก ID"""
@@ -1167,37 +976,12 @@ class LibrarySystem:
         active_members = [member for member in members if member[6] == b'0']
         deleted_members = [member for member in members if member[6] == b'1']
         
-        # นับสมาชิกที่ถูก Ban
-        banned_members = []
-        today = datetime.date.today()
-        for member in active_members:
-            ban_until = self._decode_string(member[7])
-            if ban_until:
-                try:
-                    ban_date = datetime.datetime.strptime(ban_until, "%Y-%m-%d").date()
-                    if ban_date > today:
-                        banned_members.append(member)
-                except:
-                    pass
-        
         # สถิติการยืม
         borrows = self._get_all_borrows()
-        active_borrows = [borrow for borrow in borrows if borrow[7] == b'0']
-        current_borrows = [borrow for borrow in active_borrows if borrow[6] == b'B']
-        returned_borrows = [borrow for borrow in active_borrows if borrow[6] == b'R']
-        deleted_borrows = [borrow for borrow in borrows if borrow[7] == b'1']
-        
-        # นับหนังสือที่เกินกำหนด
-        overdue_count = 0
-        for borrow in current_borrows:
-            due_date_str = self._decode_string(borrow[5])
-            if due_date_str:
-                try:
-                    due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%d").date()
-                    if today > due_date:
-                        overdue_count += 1
-                except:
-                    pass
+        active_borrows = [borrow for borrow in borrows if borrow[6] == b'0']
+        current_borrows = [borrow for borrow in active_borrows if borrow[5] == b'B']
+        returned_borrows = [borrow for borrow in active_borrows if borrow[5] == b'R']
+        deleted_borrows = [borrow for borrow in borrows if borrow[6] == b'1']
         
         print("📊 สถิติหนังสือ:")
         print(f"  - หนังสือทั้งหมด: {len(active_books)} เล่ม")
@@ -1207,19 +991,13 @@ class LibrarySystem:
         
         print("\n👥 สถิติสมาชิก:")
         print(f"  - สมาชิกทั้งหมด: {len(active_members)} คน")
-        print(f"  - สมาชิกที่ถูก Ban: {len(banned_members)} คน")
         print(f"  - สมาชิกที่ถูกลบ: {len(deleted_members)} คน")
         
         print("\n📋 สถิติการยืม:")
         print(f"  - รายการยืมทั้งหมด: {len(active_borrows)} รายการ")
         print(f"  - กำลังยืมอยู่: {len(current_borrows)} รายการ")
-        print(f"  - หนังสือเกินกำหนด: {overdue_count} รายการ ⚠️")
         print(f"  - คืนแล้ว: {len(returned_borrows)} รายการ")
         print(f"  - รายการที่ถูกลบ: {len(deleted_borrows)} รายการ")
-        
-        print("\n⚙️ การตั้งค่าระบบ:")
-        print(f"  - ระยะเวลายืม: {self.BORROW_DAYS} วัน")
-        print(f"  - ระยะเวลา Ban: {self.BAN_DAYS} วัน")
 
     def generate_report(self):
         """สร้างรายงานข้อความ"""
@@ -1368,8 +1146,7 @@ class LibrarySystem:
         print("1. ยืมหนังสือ (Borrow)")
         print("2. คืนหนังสือ (Return)")
         print("3. ดูรายการยืม (View Borrows)")
-        print("4. ตรวจสอบหนังสือเกินกำหนด (Check Overdue)")
-        print("5. ลบรายการยืม (Delete Borrow)")
+        print("4. ลบรายการยืม (Delete Borrow)")
         print("0. กลับเมนูหลัก")
 
     def run(self):
@@ -1445,7 +1222,7 @@ class LibrarySystem:
         """จัดการเมนูการยืม-คืน"""
         while True:
             self.show_borrow_menu()
-            choice = input("เลือก (0-5): ").strip()
+            choice = input("เลือก (0-4): ").strip()
             
             if choice == '1':
                 self.add_borrow()
@@ -1454,8 +1231,6 @@ class LibrarySystem:
             elif choice == '3':
                 self.view_borrows()
             elif choice == '4':
-                self.check_overdue_books()
-            elif choice == '5':
                 self.delete_borrow()
             elif choice == '0':
                 break
