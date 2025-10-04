@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+<<<<<<< Updated upstream
 # -*- coding: utf-8 -*-
 """
 ระบบจัดการห้องสมุด (Library Management System)
@@ -1236,21 +1237,31 @@ class LibrarySystem:
                 break
             else:
                 print("❌ กรุณาเลือกเมนูที่ถูกต้อง")
+=======
+# Minimal entrypoint that imports the refactored LibrarySystem class
+from libsys import LibrarySystem
+>>>>>>> Stashed changes
 
 
 def main():
-    """ฟังก์ชันหลักของโปรแกรม"""
+    library = LibrarySystem()
     try:
+<<<<<<< Updated upstream
         # สร้างอินสแตนซ์ของระบบ
         library = LibrarySystem()
         
         # เรียกใช้งานระบบ
+=======
+>>>>>>> Stashed changes
         library.run()
-        
     except Exception as e:
+<<<<<<< Updated upstream
         print(f"❌ เกิดข้อผิดพลาดร้อนแรง: {e}")
     finally:
         print("🔚 ระบบปิดทำงานแล้ว")
+=======
+        print(f"Error: {e}")
+>>>>>>> Stashed changes
 
 
 # === เริ่มต้นโปรแกรม ===
