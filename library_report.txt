@@ -1,6 +1,6 @@
 Library Borrow System
 
-Generated At: 2025-10-05 16:17:04 (+07:00)
+Generated At: 2025-10-05 17:19:47 (+07:00)
 App Version: 1.0
 Encoding: UTF-8
 
@@ -24,7 +24,6 @@ Borrow Records
 0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  | 2025-10-05  | Returned  | no
 0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
 0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
-0005 | Mark     | 0984214252   | mark@gmail.com     | test               | 2025-10-05  | 2025-10-05  | Returned  | no
 0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
 0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
 0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
@@ -37,7 +36,7 @@ Returned: 4
 Banned Members: 0
 
 Members by Status:
-  Active Borrowers: 5
+  Active Borrowers: 6
   Banned Borrowers: 0
 
 Recent Activities (last 5)
@@ -45,6 +44,6 @@ Recent Activities (last 5)
 2025-09-30 08:41:47: Borrowed "lern python" ID: 0001
 2025-10-04 08:41:47: Borrowed "How to kiss" ID: 0003
 2025-10-04 08:41:47: Borrowed "How to kiss" ID: 0002
-2025-10-05 16:17:04: System update report generated
+2025-10-05 17:19:47: System update report generated
 
 End of Report
