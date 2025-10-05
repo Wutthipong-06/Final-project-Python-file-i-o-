@@ -256,27 +256,74 @@ class LibrarySystem:
         active_books = [book for book in books if book[7] == b'0']  # Updated index for deleted flag
 
         if not active_books:
-            print("ไม่มีหนังสือในระบบ")
+            print("\n" + "=" * 80)
+            print("📚 รายการหนังสือทั้งหมด (All Books)")
+            print("=" * 80)
+            print("❌ ไม่มีหนังสือในระบบ")
+            print("=" * 80)
             return
 
-        # Calculate total quantity
+        # Calculate total quantity and available quantity
         total_quantity = 0
+        available_quantity = 0
+        borrowed_quantity = 0
+        
         for book in active_books:
             try:
-                quantity_str = self._decode_string(book[5])
-                quantity = int(quantity_str)
+                quantity = int(self._decode_string(book[5]))
                 total_quantity += quantity
+                
+                # Calculate available quantity for this book
+                book_id = self._decode_string(book[0])
+                book_borrowed = self._get_borrowed_quantity(book_id)
+                book_available = quantity - book_borrowed
+                available_quantity += book_available
+                borrowed_quantity += book_borrowed
             except:
                 total_quantity += 1  # fallback for old records
+                available_quantity += 1
+                borrowed_quantity += 0
 
-        print(f"\nมีหนังสือทั้งหมด {len(active_books)} รายการ")
-        print(f"จำนวนหนังสือรวม: {total_quantity} เล่ม")
-        print("-" * 90)
-        print(f"{'ลำดับ':<6} | {'ชื่อหนังสือ':<25} | {'ผู้แต่ง':<15} | {'จำนวน':<8} | {'สถานะ':<10}")
-        print("-" * 90)
+        print("\n" + "=" * 100)
+        print("📚 รายการหนังสือทั้งหมด (All Books)")
+        print("=" * 100)
+        print(f"📊 สรุปข้อมูล:")
+        print(f"  • รายการหนังสือทั้งหมด: {len(active_books)} รายการ")
+        print(f"  • จำนวนหนังสือรวม: {total_quantity} เล่ม")
+        print(f"  • หนังสือว่าง: {available_quantity} เล่ม")
+        print(f"  • หนังสือถูกยืม: {borrowed_quantity} เล่ม")
+        print("=" * 100)
+        print("📖 รายละเอียดหนังสือ:")
+        print("-" * 100)
+        print(f"| {'Number':<6} | {'ID':<4} | {'Title':<30} | {'Author':<20} | {'Copies':<10} | {'Status':<15}")
+        print("-" * 100)
 
         for idx, book in enumerate(active_books, 1):
-            self._display_book(book, compact=True, show_id=False, sequence=idx)
+            book_id = self._decode_string(book[0])
+            title = self._decode_string(book[1])
+            author = self._decode_string(book[2])
+            
+            try:
+                quantity = int(self._decode_string(book[5]))
+            except:
+                quantity = 1  # fallback for old records
+            
+            # Calculate available quantity
+            borrowed_quantity_book = self._get_borrowed_quantity(book_id)
+            available_quantity_book = quantity - borrowed_quantity_book
+            
+            # Format status
+            if available_quantity_book > 0:
+                status = f"{available_quantity_book} ว่าง"
+            else:
+                status = "ถูกยืมหมด"
+            
+            # Format the line
+            print(f"| {idx:<6} | {book_id:<4} | {title[:30]:<30} | {author[:20]:<20} | {quantity:>6} เล่ม | {status:<15}")
+
+        print("-" * 100)
+        print("📅 ข้อมูลอัปเดตล่าสุด:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print("-" * 100)
 
     def _view_filtered_books(self):
         print("กรองตาม:")
@@ -370,55 +417,68 @@ class LibrarySystem:
             else:
                 print(f"{sequence:<6} | {title[:25]:<25} | {author[:15]:<15} | {quantity} เล่ม | {available_quantity} ว่าง")
         else:
-            print(f"ID: {book_id}")
-            print(f"ชื่อ: {title}")
-            print(f"ผู้แต่ง: {author}")
-            print(f"ISBN: {isbn}")
-            print(f"ปีที่พิมพ์: {year}")
-            print(f"จำนวนรวม: {quantity} เล่ม")
-            print(f"จำนวนที่ว่าง: {available_quantity} เล่ม")
-            print(f"จำนวนที่ถูกยืม: {borrowed_quantity} เล่ม")
-            print("-" * 50)
+            print("┌" + "─" * 50 + "┐")
+            print(f"│ {'ข้อมูลหนังสือ':^52} │")
+            print("├" + "─" * 50 + "┤")
+            print(f"│ ID: {book_id:<44} │")
+            print(f"│ ชื่อ: {title[:42]:<44} │")
+            print(f"│ ผู้แต่ง: {author[:40]:<42} │")
+            print(f"│ ISBN: {isbn[:43]:<42} │")
+            print(f"│ ปีที่พิมพ์: {year:<41} │")
+            print(f"│ จำนวนรวม: {quantity} เล่ม{'':<33} │")
+            print(f"│ จำนวนที่ว่าง: {available_quantity} เล่ม{'':<32} │")
+            print(f"│ จำนวนที่ถูกยืม: {borrowed_quantity} เล่ม{'':<31} │")
+            print("└" + "─" * 50 + "┘")
 
     def update_book(self):
-        print("\n=== แก้ไขหนังสือ ===")
-        book_id = input("กรอก ID หนังสือที่ต้องการแก้ไข: ").strip()
+        print("\n" + "=" * 60)
+        print(" " * 20 + "📚 แก้ไขหนังสือ 📚")
+        print("=" * 60)
+        
+        book_id = input("\n🔍 กรอก ID หนังสือที่ต้องการแก้ไข: ").strip()
+        
+        if not book_id:
+            print("❌ กรุณากรอก ID หนังสือ")
+            return
 
         book_index = self._find_book_index_by_id(book_id)
         if book_index == -1:
-            print("ไม่พบหนังสือ")
+            print("\n❌ ไม่พบหนังสือ ID:", book_id)
+            print("💡 กรุณาตรวจสอบ ID และลองใหม่")
             return
 
         book = self._get_book_by_index(book_index)
         if not book:
-            print("เกิดข้อผิดพลาดในการอ่านข้อมูล")
+            print("\n❌ เกิดข้อผิดพลาดในการอ่านข้อมูล")
             return
 
-        print("ข้อมูลปัจจุบัน:")
+        print("\n📋 ข้อมูลปัจจุบัน :")
         self._display_book(book)
 
-        print("\nกรอกข้อมูลใหม่ (Enter เพื่อข้าม):")
+        print("\n" + "─" * 60)
+        print("📝 กรอกข้อมูลใหม่ (กด Enter เพื่อข้ามการแก้ไข)")
+        print("─" * 60)
 
-        title = input(f"ชื่อหนังสือ [{self._decode_string(book[1])}]: ").strip()
+        title = input(f"\n📖 ชื่อหนังสือ [{self._decode_string(book[1])}]: ").strip()
         if not title:
             title = self._decode_string(book[1])
 
-        author = input(f"ผู้แต่ง [{self._decode_string(book[2])}]: ").strip()
+        author = input(f"✍️  ผู้แต่ง [{self._decode_string(book[2])}]: ").strip()
         if not author:
             author = self._decode_string(book[2])
 
-        isbn = input(f"ISBN [{self._decode_string(book[3])}]: ").strip()
+        isbn = input(f"🔢 ISBN [{self._decode_string(book[3])}]: ").strip()
         if not isbn:
             isbn = self._decode_string(book[3])
 
-        year_input = input(f"ปีที่พิมพ์ [{self._decode_string(book[4])}]: ").strip()
+        year_input = input(f"📅 ปีที่พิมพ์ [{self._decode_string(book[4])}]: ").strip()
         if year_input:
             try:
                 year = int(year_input)
                 if year < 1000 or year > 9999:
                     raise ValueError()
             except ValueError:
-                print("ปีที่พิมพ์ต้องเป็นตัวเลข 4 หลัก")
+                print("\n❌ ปีที่พิมพ์ต้องเป็นตัวเลข 4 หลัก (1000-9999)")
                 return
         else:
             year = int(self._decode_string(book[4]))
@@ -430,17 +490,32 @@ class LibrarySystem:
             current_quantity_int = 1  # fallback for old records
             current_quantity = "1"
 
-        quantity_input = input(f"จำนวนหนังสือ (เล่ม) [{current_quantity}]: ").strip()
+        quantity_input = input(f"📚 จำนวนหนังสือ (เล่ม) [{current_quantity}]: ").strip()
         if quantity_input:
             try:
                 quantity = int(quantity_input)
                 if quantity < 1 or quantity > 9999:
                     raise ValueError()
             except ValueError:
-                print("จำนวนหนังสือต้องเป็นตัวเลข 1-9999 เล่ม")
+                print("\n❌ จำนวนหนังสือต้องเป็นตัวเลข 1-9999 เล่ม")
                 return
         else:
             quantity = current_quantity_int
+
+        # แสดงข้อมูลที่จะบันทึก
+        print("\n" + "─" * 60)
+        print("📋 ข้อมูลที่จะบันทึก:")
+        print("─" * 60)
+        print(f"📖 ชื่อหนังสือ: {title}")
+        print(f"✍️  ผู้แต่ง: {author}")
+        print(f"🔢 ISBN: {isbn}")
+        print(f"📅 ปีที่พิมพ์: {year}")
+        print(f"📚 จำนวนหนังสือ: {quantity} เล่ม")
+        
+        confirm = input("\n❓ ยืนยันการแก้ไขข้อมูล? (y/N): ").strip().lower()
+        if confirm != 'y':
+            print("\n❌ ยกเลิกการแก้ไข")
+            return
 
         updated_book = struct.pack(
             self.book_format,
@@ -455,7 +530,8 @@ class LibrarySystem:
         )
 
         self._update_record(self.books_file, book_index, updated_book, self.book_size)
-        print("แก้ไขข้อมูลหนังสือเรียบร้อย")
+        print("\n✅ แก้ไขข้อมูลหนังสือเรียบร้อย!")
+        print(f"📝 บันทึกการดำเนินการ: แก้ไขหนังสือ ID: {book_id}")
         self.operation_history.append(f"{datetime.datetime.now()}: แก้ไขหนังสือ ID: {book_id}")
 
     def delete_book(self):
@@ -1621,9 +1697,9 @@ class LibrarySystem:
 
             # Borrow Records Table
             report_content.append("Borrow Records")
-            report_content.append("-" * 135)
-            report_content.append("| ID    | Name     | Phone        | Email              | Title              | copies | Borrow Date | Return Date | Status    | Banned |")
-            report_content.append("-" * 135)
+            report_content.append("-" * 123)
+            report_content.append("| ID    | Name     | Phone        | Email              | Title           | Borrow Date | Return Date | Status    | Banned |")
+            report_content.append("-" * 123)
 
             # Display individual borrow records (not grouped)
             for borrow in active_borrows:
@@ -1649,7 +1725,7 @@ class LibrarySystem:
                     banned_status = "yes" if member[5] == b'S' else "no"
                     
                     # Format the line to match the table structure
-                    line = f"{member_id:<4} | {member_name[:8]:<8} | {member_phone:<12} | {member_email[:18]:<18} | {book_title[:18]:<18} | {book_quantity:<6} | {borrow_date_str:<11} | {return_date_str:<11} | {status:<9} | {banned_status}"
+                    line = f"{member_id:<4} | {member_name[:8]:<8} | {member_phone:<12} | {member_email[:18]:<18} | {book_title[:18]:<18} | {borrow_date_str:<11} | {return_date_str:<11} | {status:<9} | {banned_status}"
                     report_content.append(line)
 
             report_content.append("")
