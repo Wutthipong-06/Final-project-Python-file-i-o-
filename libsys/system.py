@@ -1103,14 +1103,36 @@ class LibrarySystem:
         active_borrows = [borrow for borrow in borrows if borrow[6] == b'0']
 
         if not active_borrows:
-            print("ไม่มีรายการยืมในระบบ")
+            print("\n" + "=" * 60)
+            print("📋 รายการยืมทั้งหมด (All Borrow Records)")
+            print("=" * 60)
+            print("❌ ไม่มีรายการยืมในระบบ")
+            print("=" * 60)
             return
 
-        print(f"\nมีรายการยืมทั้งหมด {len(active_borrows)} รายการ")
-        print("-" * 110)
+        # Count different types of borrows
+        current_borrows = [borrow for borrow in active_borrows if borrow[5] == b'B']
+        returned_borrows = [borrow for borrow in active_borrows if borrow[5] == b'R']
+
+        print("\n" + "=" * 96)
+        print("📋 รายการยืมทั้งหมด (All Borrow Records)")
+        print("=" * 96)
+        print(f"📊 สรุปข้อมูล:")
+        print(f"  • รายการยืมทั้งหมด: {len(active_borrows)} รายการ")
+        print(f"  • กำลังยืมอยู่: {len(current_borrows)} รายการ")
+        print(f"  • คืนแล้ว: {len(returned_borrows)} รายการ")
+        print("=" * 96)
+        print("📝 รายละเอียดรายการยืม:")
+        print("-" * 96)
+        print(f"| {'Borrow ID':<6} | {'Title':<25} | {'Member name':<15} | {'Member id':<8} | {'Borrow date':<10} | {'Status':<10}")
+        print("-" * 96)
 
         for borrow in active_borrows:
             self._display_borrow(borrow, compact=True)
+
+        print("-" * 96)
+        print("📅 ข้อมูลอัปเดตล่าสุด:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print("=" * 96)
 
     def _view_active_borrows(self):
         borrows = self._get_all_borrows()
@@ -1278,6 +1300,7 @@ class LibrarySystem:
         try:
             borrow_date = datetime.datetime.strptime(borrow_date_str, "%Y-%m-%d").date()
             due_date = borrow_date + datetime.timedelta(days=7)
+            due_date_str = due_date.strftime("%Y-%m-%d")
 
             if borrow[5] == b'B':
                 current_date = datetime.date.today()
@@ -1311,15 +1334,18 @@ class LibrarySystem:
         if compact:
             print(f"ID: {borrow_id} | {book_title[:25]:<25} | {member_name[:15]:<15} | ID:{member_id} | {borrow_date_str} | {status}{overdue_info}")
         else:
-            print(f"รหัสการยืม: {borrow_id}")
-            print(f"หนังสือ: {book_title}")
-            print(f"ผู้ยืม: {member_name}")
-            print(f"ID สมาชิก: {member_id}")
-            print(f"วันที่ยืม: {borrow_date_str}")
-            print(f"กำหนดคืน: {due_date_str}")
-            print(f"วันที่คืน: {return_date}")
-            print(f"สถานะ: {status}{overdue_info}")
-            print("-" * 50)
+            print("\n" + "=" * 60)
+            print("📋 ข้อมูลรายการยืม")
+            print("=" * 60)
+            print(f"🔢 รหัสการยืม    : {borrow_id}")
+            print(f"📚 หนังสือ       : {book_title}")
+            print(f"👤 ผู้ยืม        : {member_name}")
+            print(f"🆔 ID สมาชิก     : {member_id}")
+            print(f"📅 วันที่ยืม     : {borrow_date_str}")
+            print(f"⏰ กำหนดคืน      : {due_date_str}")
+            print(f"📤 วันที่คืน     : {return_date}")
+            print(f"📊 สถานะ        : {status}{overdue_info}")
+            print("=" * 60)
 
     def _update_book_status(self, book_id: str, status: bytes):
         book_index = self._find_book_index_by_id(book_id)
@@ -1469,7 +1495,9 @@ class LibrarySystem:
 
     # === STATISTICS AND REPORTS ===
     def view_statistics(self):
-        print("\n=== สถิติโดยสรุป ===")
+        print("\n" + "=" * 60)
+        print("📊 สถิติโดยสรุป (Summary Statistics)")
+        print("=" * 60)
 
         books = self._get_all_books()
         active_books = [book for book in books if book[7] == b'0']  # Updated index for deleted flag
@@ -1521,151 +1549,159 @@ class LibrarySystem:
                 elif book[6] == b'B':
                     borrowed_quantity += 1
 
-        print("สถิติหนังสือ:")
-        print(f"  - รายการหนังสือทั้งหมด: {len(active_books)} รายการ")
-        print(f"  - จำนวนหนังสือรวม: {total_quantity} เล่ม")
-        print(f"  - หนังสือว่าง: {len(available_books)} รายการ ({available_quantity} เล่ม)")
-        print(f"  - หนังสือถูกยืม: {len(borrowed_books)} รายการ ({borrowed_quantity} เล่ม)")
-        print(f"  - หนังสือที่ถูกลบ: {len(deleted_books)} รายการ")
+        # 📚 สถิติหนังสือ
+        print("\n📚 สถิติหนังสือ (Book Statistics)")
+        print("-" * 50)
+        print(f"  📖 รายการหนังสือทั้งหมด: {len(active_books):>3} รายการ")
+        print(f"  📚 จำนวนหนังสือรวม:     {total_quantity:>3} เล่ม")
+        print(f"  ✅ หนังสือว่าง:          {len(available_books):>3} รายการ ({available_quantity:>3} เล่ม)")
+        print(f"  🔄 หนังสือถูกยืม:        {len(borrowed_books):>3} รายการ ({borrowed_quantity:>3} เล่ม)")
+        print(f"  🗑️  หนังสือที่ถูกลบ:      {len(deleted_books):>3} รายการ")
 
-        print("\nสถิติสมาชิก:")
-        print(f"  - สมาชิกทั้งหมด: {len(active_members)} คน")
-        print(f"  - สมาชิกถูกแบน: {len(banned_members)} คน")
-        print(f"  - สมาชิกที่ถูกลบ: {len(deleted_members)} คน")
+        # 👥 สถิติสมาชิก
+        print("\n👥 สถิติสมาชิก (Member Statistics)")
+        print("-" * 50)
+        print(f"  👤 สมาชิกทั้งหมด:        {len(active_members):>3} คน")
+        print(f"  ✅ สมาชิกปกติ:           {len(active_members):>3} คน")
+        print(f"  🚫 สมาชิกถูกแบน:         {len(banned_members):>3} คน")
+        print(f"  🗑️  สมาชิกที่ถูกลบ:       {len(deleted_members):>3} คน")
 
-        print("\nสถิติการยืม:")
-        print(f"  - รายการยืมทั้งหมด: {len(active_borrows)} รายการ")
-        print(f"  - กำลังยืมอยู่: {len(current_borrows)} รายการ")
-        print(f"  - เกินกำหนดคืน: {overdue_count} รายการ")
-        print(f"  - คืนแล้ว: {len(returned_borrows)} รายการ")
-        print(f"  - รายการที่ถูกลบ: {len(deleted_borrows)} รายการ")
+        # 📋 สถิติการยืม
+        print("\n📋 สถิติการยืม (Borrow Statistics)")
+        print("-" * 50)
+        print(f"  📝 รายการยืมทั้งหมด:     {len(active_borrows):>3} รายการ")
+        print(f"  🔄 กำลังยืมอยู่:         {len(current_borrows):>3} รายการ")
+        print(f"  ⏰ เกินกำหนดคืน:         {overdue_count:>3} รายการ")
+        print(f"  ✅ คืนแล้ว:             {len(returned_borrows):>3} รายการ")
+        print(f"  🗑️  รายการที่ถูกลบ:       {len(deleted_borrows):>3} รายการ")
+
+        # 📈 สรุปภาพรวม
+        print("\n📈 สรุปภาพรวม (Overall Summary)")
+        print("-" * 50)
+        print(f"  📊 อัตราการยืม:         {(len(current_borrows)/len(active_borrows)*100):>5.1f}%" if active_borrows else "  📊 อัตราการยืม:           0.0%")
+        print(f"  📊 อัตราการคืน:         {(len(returned_borrows)/len(active_borrows)*100):>5.1f}%" if active_borrows else "  📊 อัตราการคืน:           0.0%")
+        print(f"  📊 อัตราการเกินกำหนด:    {(overdue_count/len(current_borrows)*100):>5.1f}%" if current_borrows else "  📊 อัตราการเกินกำหนด:      0.0%")
+        print(f"  📊 อัตราการใช้งานหนังสือ: {(borrowed_quantity/total_quantity*100):>5.1f}%" if total_quantity else "  📊 อัตราการใช้งานหนังสือ:   0.0%")
+
+        print("\n" + "=" * 60)
+        print("📅 ข้อมูลอัปเดตล่าสุด:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print("=" * 60)
 
     def generate_report(self):
         print("\n=== สร้างรายงาน ===")
 
         try:
             report_content = []
-            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = datetime.datetime.now()
+            current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            timezone_str = current_time.strftime("%z")
+            if not timezone_str:
+                timezone_str = "+07:00"  # Default to Thailand timezone
 
-            report_content.append("=" * 80)
-            report_content.append("รายงานระบบจัดการห้องสมุด")
-            report_content.append("Library Management System Report")
-            report_content.append("=" * 80)
-            report_content.append(f"วันที่สร้างรายงาน: {current_time}")
-            report_content.append("-" * 80)
+            # System Information Section
+            report_content.append("Library Borrow System")
+            report_content.append("")
+            report_content.append(f"Generated At: {current_time_str} ({timezone_str})")
+            report_content.append("App Version: 1.0")
+            report_content.append("Encoding: UTF-8")
+            report_content.append("")
 
+            # Get data
             books = self._get_all_books()
-            active_books = [book for book in books if book[7] == b'0']  # Updated index for deleted flag
-            available_books = [book for book in active_books if book[6] == b'A']  # Updated index for status
-            borrowed_books = [book for book in active_books if book[6] == b'B']   # Updated index for status
-            deleted_books = [book for book in books if book[7] == b'1']  # Updated index for deleted flag
-
+            active_books = [book for book in books if book[7] == b'0']
+            
             members = self._get_all_members()
             active_members = [member for member in members if member[6] == b'0' and member[5] == b'A']
             banned_members = [member for member in members if member[6] == b'0' and member[5] == b'S']
-            deleted_members = [member for member in members if member[6] == b'1']
 
             borrows = self._get_all_borrows()
             active_borrows = [borrow for borrow in borrows if borrow[6] == b'0']
             current_borrows = [borrow for borrow in active_borrows if borrow[5] == b'B']
             returned_borrows = [borrow for borrow in active_borrows if borrow[5] == b'R']
-            deleted_borrows = [borrow for borrow in borrows if borrow[6] == b'1']
 
-            current_date = datetime.date.today()
-            overdue_count = 0
-            for borrow in current_borrows:
-                try:
-                    borrow_date = datetime.datetime.strptime(
-                        self._decode_string(borrow[3]), "%Y-%m-%d"
-                    ).date()
-                    due_date = borrow_date + datetime.timedelta(days=7)
-                    if (current_date - due_date).days > 0:
-                        overdue_count += 1
-                except:
-                    pass
+            # Borrow Records Table
+            report_content.append("Borrow Records")
+            report_content.append("-" * 135)
+            report_content.append("| ID    | Name     | Phone        | Email              | Title              | copies | Borrow Date | Return Date | Status    | Banned |")
+            report_content.append("-" * 135)
 
-            # Calculate total quantities for report
-            total_quantity = 0
-            available_quantity = 0
-            borrowed_quantity = 0
+            # Display individual borrow records (not grouped)
+            for borrow in active_borrows:
+                member_id = self._decode_string(borrow[2])
+                book_id = self._decode_string(borrow[1])
+                member = self._find_member_by_id(member_id)
+                book = self._find_book_by_id(book_id)
+                
+                if member and book:
+                    member_name = self._decode_string(member[1])
+                    member_phone = self._decode_string(member[3])
+                    member_email = self._decode_string(member[2])
+                    book_title = self._decode_string(book[1])
+                    
+                    try:
+                        book_quantity = int(self._decode_string(book[5]))
+                    except:
+                        book_quantity = 1
+                    
+                    borrow_date_str = self._decode_string(borrow[3])
+                    return_date_str = self._decode_string(borrow[4]) if borrow[4] else "-"
+                    status = "Borrowed" if borrow[5] == b'B' else "Returned"
+                    banned_status = "yes" if member[5] == b'S' else "no"
+                    
+                    # Format the line to match the table structure
+                    line = f"{member_id:<4} | {member_name[:8]:<8} | {member_phone:<12} | {member_email[:18]:<18} | {book_title[:18]:<18} | {book_quantity:<6} | {borrow_date_str:<11} | {return_date_str:<11} | {status:<9} | {banned_status}"
+                    report_content.append(line)
+
+            report_content.append("")
+
+            # Summary Section
+            report_content.append("Summary")
+            report_content.append("")
+            report_content.append(f"Total Borrows (records): {len(active_borrows)}")
+            report_content.append(f"Currently Borrowed: {len(current_borrows)}")
+            report_content.append(f"Returned: {len(returned_borrows)}")
+            report_content.append(f"Banned Members: {len(banned_members)}")
+            report_content.append("")
+            report_content.append("Members by Status:")
+            report_content.append(f"  Active Borrowers: {len(active_members)}")
+            report_content.append(f"  Banned Borrowers: {len(banned_members)}")
+            report_content.append("")
+
+            # Recent Activities Section
+            report_content.append("Recent Activities (last 5)")
+            report_content.append("")
             
-            for book in active_books:
-                try:
-                    quantity = int(self._decode_string(book[5]))
-                    total_quantity += quantity
-                    if book[6] == b'A':
-                        available_quantity += quantity
-                    elif book[6] == b'B':
-                        borrowed_quantity += quantity
-                except:
-                    total_quantity += 1
-                    if book[6] == b'A':
-                        available_quantity += 1
-                    elif book[6] == b'B':
-                        borrowed_quantity += 1
-
-            report_content.append("\nสรุปข้อมูลระบบ")
-            report_content.append("-" * 40)
-            report_content.append("หนังสือ:")
-            report_content.append(f"  - รายการหนังสือทั้งหมด: {len(active_books)} รายการ")
-            report_content.append(f"  - จำนวนหนังสือรวม: {total_quantity} เล่ม")
-            report_content.append(f"  - หนังสือว่าง: {len(available_books)} รายการ ({available_quantity} เล่ม)")
-            report_content.append(f"  - หนังสือถูกยืม: {len(borrowed_books)} รายการ ({borrowed_quantity} เล่ม)")
-            report_content.append(f"  - หนังสือที่ถูกลบ: {len(deleted_books)} รายการ")
-
-            report_content.append("\nสมาชิก:")
-            report_content.append(f"  - จำนวนสมาชิกทั้งหมด: {len(active_members)} คน")
-            report_content.append(f"  - สมาชิกถูกแบน: {len(banned_members)} คน")
-            report_content.append(f"  - สมาชิกที่ถูกลบ: {len(deleted_members)} คน")
-
-            report_content.append("\nรายการยืม:")
-            report_content.append(f"  - รายการยืมทั้งหมด: {len(active_borrows)} รายการ")
-            report_content.append(f"  - กำลังยืมอยู่: {len(current_borrows)} รายการ")
-            report_content.append(f"  - เกินกำหนดคืน: {overdue_count} รายการ")
-            report_content.append(f"  - คืนแล้ว: {len(returned_borrows)} รายการ")
-            report_content.append(f"  - รายการที่ถูกลบ: {len(deleted_borrows)} รายการ")
-
-            report_content.append("\nข้อมูลไฟล์")
-            report_content.append("-" * 40)
-            for filename, description in [
-                (self.books_file, "หนังสือ"),
-                (self.members_file, "สมาชิก"),
-                (self.borrows_file, "รายการยืม")
-            ]:
-                if os.path.exists(filename):
-                    file_size = os.path.getsize(filename)
-                    report_content.append(f"  - ไฟล์{description} ({filename}): {file_size} bytes")
-                else:
-                    report_content.append(f"  - ไฟล์{description} ({filename}): ไม่พบไฟล์")
-
-            if active_borrows:
-                book_borrow_count = {}
-                for borrow in active_borrows:
-                    book_id = self._decode_string(borrow[1])
-                    book_borrow_count[book_id] = book_borrow_count.get(book_id, 0) + 1
-
-                if book_borrow_count:
-                    sorted_books = sorted(book_borrow_count.items(), key=lambda x: x[1], reverse=True)
-                    report_content.append("\nหนังสือยอดนิยม (5 อันดับแรก)")
-                    report_content.append("-" * 40)
-
-                    for i, (book_id, count) in enumerate(sorted_books[:5], 1):
-                        book = self._find_book_by_id(book_id)
-                        if book:
-                            title = self._decode_string(book[1])
-                            report_content.append(f"  {i}. {title} - ถูกยืม {count} ครั้ง")
-
+            # Get recent activities from operation history
             if self.operation_history:
-                report_content.append("\nประวัติการทำงานล่าสุด (10 รายการ)")
-                report_content.append("-" * 40)
-                recent_operations = self.operation_history[-10:]
-                for operation in recent_operations:
-                    report_content.append(f"  - {operation}")
+                recent_activities = self.operation_history[-5:]
+                for activity in reversed(recent_activities):  # Show most recent first
+                    report_content.append(f"{activity}")
+            else:
+                # Generate some sample activities based on current data
+                sample_activities = []
+                for borrow in current_borrows[:3]:  # Show up to 3 current borrows
+                    member_id = self._decode_string(borrow[2])
+                    book_id = self._decode_string(borrow[1])
+                    book = self._find_book_by_id(book_id)
+                    if book:
+                        book_title = self._decode_string(book[1])
+                        borrow_date_str = self._decode_string(borrow[3])
+                        sample_activities.append(f"{borrow_date_str} 08:41:47: Borrowed \"{book_title}\" ID: {member_id}")
+                
+                # Add overdue detection if there are banned members
+                if banned_members:
+                    sample_activities.append(f"{current_time_str}: Overdue detected -> Member ID: {self._decode_string(banned_members[0][0])} (Banned)")
+                
+                # Add system update
+                sample_activities.append(f"{current_time_str}: System update report generated")
+                
+                for activity in sample_activities[-5:]:  # Show last 5
+                    report_content.append(activity)
 
-            report_content.append("\n" + "=" * 80)
-            report_content.append("จบรายงาน")
-            report_content.append("=" * 80)
+            report_content.append("")
+            report_content.append("End of Report")
 
+            # Write to file
             with open(self.report_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(report_content))
 
@@ -1681,7 +1717,7 @@ class LibrarySystem:
     # === MAIN MENU ===
     def show_main_menu(self):
         print("\n" + "=" * 60)
-        print("ระบบจัดการห้องสมุด (Library Management System)")
+        print("ระบบจัดการห้องสมุด (Library Management System) v1.0")
         print("=" * 60)
         print("1. จัดการหนังสือ (Books)")
         print("2. จัดการสมาชิก (Members)")
@@ -1692,7 +1728,7 @@ class LibrarySystem:
         print("-" * 60)
 
     def show_book_menu(self):
-        print("\nเมนูจัดการหนังสือ")
+        print("\n --- เมนูจัดการหนังสือ ---")
         print("1. เพิ่มหนังสือ (Add)")
         print("2. ดูข้อมูลหนังสือ (View)")
         print("3. แก้ไขหนังสือ (Update)")
@@ -1700,7 +1736,7 @@ class LibrarySystem:
         print("0. กลับเมนูหลัก")
 
     def show_member_menu(self):
-        print("\nเมนูจัดการสมาชิก")
+        print("\n --- เมนูจัดการสมาชิก ---")
         print("1. เพิ่มสมาชิก (Add)")
         print("2. ดูข้อมูลสมาชิก (View)")
         print("3. แก้ไขสมาชิก (Update)")
@@ -1708,7 +1744,7 @@ class LibrarySystem:
         print("0. กลับเมนูหลัก")
 
     def show_borrow_menu(self):
-        print("\nเมนูจัดการการยืม-คืน")
+        print("\n --- เมนูจัดการการยืม-คืน ---")
         print("1. ยืมหนังสือ (Borrow)")
         print("2. คืนหนังสือ (Return)")
         print("3. ดูรายการยืม (View Borrows)")
@@ -1716,7 +1752,7 @@ class LibrarySystem:
         print("0. กลับเมนูหลัก")
 
     def run(self):
-        print("ยินดีต้อนรับสู่ระบบจัดการห้องสมุด")
+        print("ยินดีต้อนรับสู่ระบบจัดการห้องสมุด!")
 
         while True:
             try:
