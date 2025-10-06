@@ -1,40 +1,42 @@
 Library Borrow System
 
-Generated At: 2025-10-05 15:16:22 (+07:00)
+Generated At: 2025-10-06 12:11:30 (+07:00)
 App Version: 1.0
 Encoding: UTF-8
 
 Borrow Records
----------------------------------------------------------------------------------------------------------------------------------------
-| ID    | Name     | Phone        | Email              | Title              | copies | Borrow Date | Return Date | Status    | Banned |
----------------------------------------------------------------------------------------------------------------------------------------
-0001 | Folk     | 0987654321   | folk01@email.com   | lern python        | 1      | 2025-09-30  |             | Borrowed  | no
-0001 | Folk     | 0987654321   | folk01@email.com   | lern css           | 1      | 2025-09-30  | 2025-10-01  | Returned  | no
-0002 | gogowa   | 0123456789   | wwa@kkk            | lern css           | 1      | 2025-10-04  | 2025-10-05  | Returned  | no
-0003 | ibank    | 0917241312   | asodjd@gmail.com   | How to kiss        | 12     | 2025-10-04  |             | Borrowed  | no
-0002 | gogowa   | 0123456789   | wwa@kkk            | How to kiss        | 12     | 2025-10-04  |             | Borrowed  | no
-0001 | Folk     | 0987654321   | folk01@email.com   | How to kiss        | 12     | 2025-10-04  |             | Borrowed  | no
-0001 | Folk     | 0987654321   | folk01@email.com   | How to kiss        | 12     | 2025-10-04  |             | Borrowed  | no
-0001 | Folk     | 0987654321   | folk01@email.com   | How to kiss        | 12     | 2025-10-04  |             | Borrowed  | no
-0002 | gogowa   | 0123456789   | wwa@kkk            | How to kiss        | 12     | 2025-10-05  |             | Borrowed  | no
-0002 | gogowa   | 0123456789   | wwa@kkk            | How to kiss        | 12     | 2025-10-05  |             | Borrowed  | no
-0002 | gogowa   | 0123456789   | wwa@kkk            | How to Fart        | 9999   | 2025-10-05  |             | Borrowed  | no
-0002 | gogowa   | 0123456789   | wwa@kkk            | How to Fart        | 9999   | 2025-10-05  |             | Borrowed  | no
-0002 | gogowa   | 0123456789   | wwa@kkk            | How to Fart        | 9999   | 2025-10-05  |             | Borrowed  | no
-0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 5      | 2025-10-05  | 2025-10-05  | Returned  | no
-0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 5      | 2025-10-05  |             | Borrowed  | no
-0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 5      | 2025-10-05  |             | Borrowed  | no
-0005 | Mark     | 0984214252   | mark@gmail.com     | test               | 1      | 2025-10-05  | 2025-10-05  | Returned  | no
+---------------------------------------------------------------------------------------------------------------------------
+| ID    | Name     | Phone        | Email              | Title           | Borrow Date | Return Date | Status    | Banned |
+---------------------------------------------------------------------------------------------------------------------------
+0001 | Folk     | 0987654321   | folk01@email.com   | lern python        | 2025-09-30  |             | Borrowed  | no
+0001 | Folk     | 0987654321   | folk01@email.com   | lern css           | 2025-09-30  | 2025-10-01  | Returned  | no
+0002 | gogowa   | 0123456789   | wwa@kkk            | lern css           | 2025-10-04  | 2025-10-05  | Returned  | no
+0003 | ibank    | 0917241312   | asodjd@gmail.com   | How to kiss        | 2025-10-04  |             | Borrowed  | no
+0002 | gogowa   | 0123456789   | wwa@kkk            | How to kiss        | 2025-10-04  |             | Borrowed  | no
+0001 | Folk     | 0987654321   | folk01@email.com   | How to kiss        | 2025-10-04  |             | Borrowed  | no
+0001 | Folk     | 0987654321   | folk01@email.com   | How to kiss        | 2025-10-04  |             | Borrowed  | no
+0001 | Folk     | 0987654321   | folk01@email.com   | How to kiss        | 2025-10-04  |             | Borrowed  | no
+0002 | gogowa   | 0123456789   | wwa@kkk            | How to kiss        | 2025-10-05  |             | Borrowed  | no
+0002 | gogowa   | 0123456789   | wwa@kkk            | How to kiss        | 2025-10-05  |             | Borrowed  | no
+0002 | gogowa   | 0123456789   | wwa@kkk            | How to Fart        | 2025-10-05  |             | Borrowed  | no
+0002 | gogowa   | 0123456789   | wwa@kkk            | How to Fart        | 2025-10-05  |             | Borrowed  | no
+0002 | gogowa   | 0123456789   | wwa@kkk            | How to Fart        | 2025-10-05  |             | Borrowed  | no
+0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  | 2025-10-05  | Returned  | no
+0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
+0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
+0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
+0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
+0005 | Mark     | 0984214252   | mark@gmail.com     | Its gonnabe ok     | 2025-10-05  |             | Borrowed  | no
 
 Summary
 
-Total Borrows (records): 17
-Currently Borrowed: 13
+Total Borrows (records): 20
+Currently Borrowed: 16
 Returned: 4
 Banned Members: 0
 
 Members by Status:
-  Active Borrowers: 5
+  Active Borrowers: 6
   Banned Borrowers: 0
 
 Recent Activities (last 5)
@@ -42,6 +44,6 @@ Recent Activities (last 5)
 2025-09-30 08:41:47: Borrowed "lern python" ID: 0001
 2025-10-04 08:41:47: Borrowed "How to kiss" ID: 0003
 2025-10-04 08:41:47: Borrowed "How to kiss" ID: 0002
-2025-10-05 15:16:22: System update report generated
+2025-10-06 12:11:30: System update report generated
 
 End of Report

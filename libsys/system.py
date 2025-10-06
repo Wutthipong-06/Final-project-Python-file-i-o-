@@ -169,39 +169,61 @@ class LibrarySystem:
 
     # === BOOKS MANAGEMENT ===
     def add_book(self):
-        print("\n=== เพิ่มหนังสือ ===")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "📚 เพิ่มหนังสือใหม่ 📚")
+        print("=" * 60)
+        
+        print("\n📝 กรุณากรอกข้อมูลหนังสือ")
+        print("─" * 60)
+        
         try:
-            title = input("ชื่อหนังสือ: ").strip()
+            title = input("\n📖 ชื่อหนังสือ: ").strip()
             if not title:
-                print("กรุณากรอกชื่อหนังสือ")
+                print("❌ กรุณากรอกชื่อหนังสือ")
                 return
 
-            author = input("ผู้แต่ง: ").strip()
+            author = input("✍️  ผู้แต่ง: ").strip()
             if not author:
-                print("กรุณากรอกชื่อผู้แต่ง")
+                print("❌ กรุณากรอกชื่อผู้แต่ง")
                 return
 
-            isbn = input("ISBN: ").strip()
-            year_str = input("ปีที่พิมพ์: ").strip()
+            isbn = input("🔢 ISBN: ").strip()
+            year_str = input("📅 ปีที่พิมพ์: ").strip()
 
             try:
                 year = int(year_str)
                 if year < 1000 or year > 9999:
                     raise ValueError()
             except ValueError:
-                print("ปีที่พิมพ์ต้องเป็นตัวเลข 4 หลัก")
+                print("\n❌ ปีที่พิมพ์ต้องเป็นตัวเลข 4 หลัก (1000-9999)")
                 return
 
-            quantity_str = input("จำนวนหนังสือ (เล่ม): ").strip()
+            quantity_str = input("📚 จำนวนหนังสือ (เล่ม): ").strip()
             try:
                 quantity = int(quantity_str)
                 if quantity < 1 or quantity > 9999:
                     raise ValueError()
             except ValueError:
-                print("จำนวนหนังสือต้องเป็นตัวเลข 1-9999 เล่ม")
+                print("\n❌ จำนวนหนังสือต้องเป็นตัวเลข 1-9999 เล่ม")
                 return
 
             book_id = self._get_next_id(self.books_file, self.book_size)
+
+            # แสดงข้อมูลที่จะบันทึก
+            print("\n" + "─" * 60)
+            print("📋 ข้อมูลที่จะบันทึก:")
+            print("─" * 60)
+            print(f"📖 ชื่อหนังสือ: {title}")
+            print(f"✍️  ผู้แต่ง: {author}")
+            print(f"🔢 ISBN: {isbn}")
+            print(f"📅 ปีที่พิมพ์: {year}")
+            print(f"📚 จำนวนหนังสือ: {quantity} เล่ม")
+            print(f"🆔 ID หนังสือ: {book_id}")
+            
+            confirm = input("\n❓ ยืนยันการเพิ่มหนังสือ? (y/N): ").strip().lower()
+            if confirm != 'y':
+                print("\n❌ ยกเลิกการเพิ่มหนังสือ")
+                return
 
             book_data = struct.pack(
                 self.book_format,
@@ -218,21 +240,28 @@ class LibrarySystem:
             with open(self.books_file, 'ab') as f:
                 f.write(book_data)
 
-            print(f"เพิ่มหนังสือเรียบร้อย ID: {book_id}")
-            print(f"ชื่อหนังสือ: {title}")
-            print(f"จำนวน: {quantity} เล่ม")
+            print("\n✅ เพิ่มหนังสือเรียบร้อย!")
+            print("─" * 60)
+            print(f"🆔 ID: {book_id}")
+            print(f"📖 ชื่อหนังสือ: {title}")
+            print(f"📚 จำนวน: {quantity} เล่ม")
+            print(f"📝 บันทึกการดำเนินการ: เพิ่มหนังสือ '{title}' ID: {book_id} จำนวน {quantity} เล่ม")
             self.operation_history.append(f"{datetime.datetime.now()}: เพิ่มหนังสือ '{title}' ID: {book_id} จำนวน {quantity} เล่ม")
 
         except Exception as e:
-            print(f"เกิดข้อผิดพลาด: {e}")
+            print(f"\n❌ เกิดข้อผิดพลาด: {e}")
 
     def view_books(self):
-        print("\n=== ดูข้อมูลหนังสือ ===")
-        print("1. ดูหนังสือเล่มเดียว")
-        print("2. ดูหนังสือทั้งหมด")
-        print("3. ดูหนังสือแบบกรอง")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "📚 ดูข้อมูลหนังสือ 📚")
+        print("=" * 60)
+        print("\n📋 เลือกประเภทการดูข้อมูล:")
+        print("─" * 60)
+        print("1. 👤 ดูหนังสือเล่มเดียว")
+        print("2. 📊 ดูหนังสือทั้งหมด")
+        print("3. 🔍 ดูหนังสือแบบกรอง")
 
-        choice = input("เลือก (1-3): ").strip()
+        choice = input("\n❓ เลือก (1-3): ").strip()
 
         if choice == '1':
             self._view_single_book()
@@ -240,52 +269,119 @@ class LibrarySystem:
             self._view_all_books()
         elif choice == '3':
             self._view_filtered_books()
+        else:
+            print("\n❌ กรุณาเลือกตัวเลือกที่ถูกต้อง (1-3)")
 
     def _view_single_book(self):
-        book_id = input("กรอก ID หนังสือ: ").strip()
+        print("\n" + "─" * 60)
+        print("👤 ดูข้อมูลหนังสือเล่มเดียว")
+        print("─" * 60)
+        
+        book_id = input("\n🔍 กรอก ID หนังสือ: ").strip()
+        
+        if not book_id:
+            print("❌ กรุณากรอก ID หนังสือ")
+            return
+            
         book = self._find_book_by_id(book_id)
 
         if book:
-            print("\n=== ข้อมูลหนังสือ ===")
+            print("\n📋 ข้อมูลหนังสือ:")
             self._display_book(book)
         else:
-            print("ไม่พบหนังสือ")
+            print(f"\n❌ ไม่พบหนังสือ ID: {book_id}")
+            print("💡 กรุณาตรวจสอบ ID และลองใหม่")
 
     def _view_all_books(self):
+        print("\n" + "─" * 60)
+        print("📊 ดูข้อมูลหนังสือทั้งหมด")
+        print("─" * 60)
+        
         books = self._get_all_books()
         active_books = [book for book in books if book[7] == b'0']  # Updated index for deleted flag
 
         if not active_books:
-            print("ไม่มีหนังสือในระบบ")
+            print("\n📭 ไม่มีหนังสือในระบบ")
             return
 
-        # Calculate total quantity
+        # Calculate total quantity and available quantity
         total_quantity = 0
+        available_quantity = 0
+        borrowed_quantity = 0
+        
         for book in active_books:
             try:
-                quantity_str = self._decode_string(book[5])
-                quantity = int(quantity_str)
+                quantity = int(self._decode_string(book[5]))
                 total_quantity += quantity
+                
+                # Calculate available quantity for this book
+                book_id = self._decode_string(book[0])
+                book_borrowed = self._get_borrowed_quantity(book_id)
+                book_available = quantity - book_borrowed
+                available_quantity += book_available
+                borrowed_quantity += book_borrowed
             except:
                 total_quantity += 1  # fallback for old records
+                available_quantity += 1
+                borrowed_quantity += 0
 
-        print(f"\nมีหนังสือทั้งหมด {len(active_books)} รายการ")
-        print(f"จำนวนหนังสือรวม: {total_quantity} เล่ม")
-        print("-" * 90)
-        print(f"{'ลำดับ':<6} | {'ชื่อหนังสือ':<25} | {'ผู้แต่ง':<15} | {'จำนวน':<8} | {'สถานะ':<10}")
-        print("-" * 90)
+        print(f"\n📈 สรุปข้อมูล:")
+        print(f"📚 รายการหนังสือทั้งหมด: {len(active_books)} รายการ")
+        print(f"📖 จำนวนหนังสือรวม: {total_quantity} เล่ม")
+        print(f"📋 หนังสือว่าง: {available_quantity} เล่ม")
+        print(f"📚 หนังสือถูกยืม: {borrowed_quantity} เล่ม")
+        print("─" * 100)
+        print(f"{'ลำดับ':<4} | {'ID':<6} | {'ชื่อหนังสือ':<30} | {'ผู้แต่ง':<20} | {'จำนวน':<8} | {'สถานะ':<15}")
+        print("─" * 100)
 
         for idx, book in enumerate(active_books, 1):
-            self._display_book(book, compact=True, show_id=False, sequence=idx)
+            book_id = self._decode_string(book[0])
+            title = self._decode_string(book[1])
+            author = self._decode_string(book[2])
+            
+            try:
+                quantity = int(self._decode_string(book[5]))
+            except:
+                quantity = 1  # fallback for old records
+            
+            # Calculate available quantity
+            borrowed_quantity_book = self._get_borrowed_quantity(book_id)
+            available_quantity_book = quantity - borrowed_quantity_book
+            
+            # Format status
+            if available_quantity_book > 0:
+                status = f"{available_quantity_book} ว่าง"
+            else:
+                status = "ถูกยืมหมด"
+            
+            # Format the line
+            print(f"{idx:<4} | {book_id:<6} | {title[:30]:<30} | {author[:20]:<20} | {quantity:>6} เล่ม | {status:<15}")
+
+        print("─" * 100)
+        print(f"📅 ข้อมูลอัปเดตล่าสุด: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("─" * 100)
 
     def _view_filtered_books(self):
-        print("กรองตาม:")
-        print("1. ชื่อหนังสือ")
-        print("2. ผู้แต่ง")
-        print("3. ปีที่พิมพ์")
+        print("\n" + "─" * 60)
+        print("🔍 ดูข้อมูลหนังสือแบบกรอง")
+        print("─" * 60)
+        
+        print("\n📋 เลือกประเภทการกรอง:")
+        print("1. 📖 ชื่อหนังสือ")
+        print("2. ✍️  ผู้แต่ง")
+        print("3. 📅 ปีที่พิมพ์")
 
-        filter_choice = input("เลือก (1-3): ").strip()
-        keyword = input("คำค้นหา: ").strip().lower()
+        filter_choice = input("\n❓ เลือก (1-3): ").strip()
+        
+        if filter_choice not in ['1', '2', '3']:
+            print("\n❌ กรุณาเลือกตัวเลือกที่ถูกต้อง (1-3)")
+            return
+            
+        keyword = input("🔍 คำค้นหา: ").strip().lower()
+        
+        if not keyword:
+            print("❌ กรุณากรอกคำค้นหา")
+            return
 
         books = self._get_all_books()
         active_books = [book for book in books if book[7] == b'0']  # Updated index for deleted flag
@@ -310,15 +406,16 @@ class LibrarySystem:
                 except:
                     filtered_quantity += 1  # fallback for old records
             
-            print(f"\nพบหนังสือ {len(filtered_books)} รายการ")
-            print(f"จำนวนหนังสือรวม: {filtered_quantity} เล่ม")
-            print("-" * 90)
+            print(f"\n✅ พบหนังสือ {len(filtered_books)} รายการ")
+            print(f"📚 จำนวนหนังสือรวม: {filtered_quantity} เล่ม")
+            print("─" * 90)
             print(f"{'ลำดับ':<6} | {'ชื่อหนังสือ':<25} | {'ผู้แต่ง':<15} | {'จำนวน':<8} | {'สถานะ':<10}")
-            print("-" * 90)
+            print("─" * 90)
             for idx, book in enumerate(filtered_books, 1):
                 self._display_book(book, compact=True, show_id=False, sequence=idx)
         else:
-            print("ไม่พบหนังสือที่ตรงกับเงื่อนไข")
+            print(f"\n❌ ไม่พบหนังสือที่ตรงกับเงื่อนไข: '{keyword}'")
+            print("💡 ลองใช้คำค้นหาอื่น หรือตรวจสอบการสะกด")
 
     def _find_book_by_id(self, book_id: str):
         books = self._get_all_books()
@@ -370,55 +467,68 @@ class LibrarySystem:
             else:
                 print(f"{sequence:<6} | {title[:25]:<25} | {author[:15]:<15} | {quantity} เล่ม | {available_quantity} ว่าง")
         else:
-            print(f"ID: {book_id}")
-            print(f"ชื่อ: {title}")
-            print(f"ผู้แต่ง: {author}")
-            print(f"ISBN: {isbn}")
-            print(f"ปีที่พิมพ์: {year}")
-            print(f"จำนวนรวม: {quantity} เล่ม")
-            print(f"จำนวนที่ว่าง: {available_quantity} เล่ม")
-            print(f"จำนวนที่ถูกยืม: {borrowed_quantity} เล่ม")
-            print("-" * 50)
+            print("┌" + "─" * 50 + "┐")
+            print(f"│ {'ข้อมูลหนังสือ':^52} │")
+            print("├" + "─" * 50 + "┤")
+            print(f"│ ID: {book_id:<44} │")
+            print(f"│ ชื่อ: {title[:42]:<44} │")
+            print(f"│ ผู้แต่ง: {author[:40]:<42} │")
+            print(f"│ ISBN: {isbn[:43]:<42} │")
+            print(f"│ ปีที่พิมพ์: {year:<41} │")
+            print(f"│ จำนวนรวม: {quantity} เล่ม{'':<33} │")
+            print(f"│ จำนวนที่ว่าง: {available_quantity} เล่ม{'':<32} │")
+            print(f"│ จำนวนที่ถูกยืม: {borrowed_quantity} เล่ม{'':<31} │")
+            print("└" + "─" * 50 + "┘")
 
     def update_book(self):
-        print("\n=== แก้ไขหนังสือ ===")
-        book_id = input("กรอก ID หนังสือที่ต้องการแก้ไข: ").strip()
+        print("\n" + "=" * 60)
+        print(" " * 20 + "📚 แก้ไขหนังสือ 📚")
+        print("=" * 60)
+        
+        book_id = input("\n🔍 กรอก ID หนังสือที่ต้องการแก้ไข: ").strip()
+        
+        if not book_id:
+            print("❌ กรุณากรอก ID หนังสือ")
+            return
 
         book_index = self._find_book_index_by_id(book_id)
         if book_index == -1:
-            print("ไม่พบหนังสือ")
+            print("\n❌ ไม่พบหนังสือ ID:", book_id)
+            print("💡 กรุณาตรวจสอบ ID และลองใหม่")
             return
 
         book = self._get_book_by_index(book_index)
         if not book:
-            print("เกิดข้อผิดพลาดในการอ่านข้อมูล")
+            print("\n❌ เกิดข้อผิดพลาดในการอ่านข้อมูล")
             return
 
-        print("ข้อมูลปัจจุบัน:")
+        print("\n📋 ข้อมูลปัจจุบัน :")
         self._display_book(book)
 
-        print("\nกรอกข้อมูลใหม่ (Enter เพื่อข้าม):")
+        print("\n" + "─" * 60)
+        print("📝 กรอกข้อมูลใหม่ (กด Enter เพื่อข้ามการแก้ไข)")
+        print("─" * 60)
 
-        title = input(f"ชื่อหนังสือ [{self._decode_string(book[1])}]: ").strip()
+        title = input(f"\n📖 ชื่อหนังสือ [{self._decode_string(book[1])}]: ").strip()
         if not title:
             title = self._decode_string(book[1])
 
-        author = input(f"ผู้แต่ง [{self._decode_string(book[2])}]: ").strip()
+        author = input(f"✍️  ผู้แต่ง [{self._decode_string(book[2])}]: ").strip()
         if not author:
             author = self._decode_string(book[2])
 
-        isbn = input(f"ISBN [{self._decode_string(book[3])}]: ").strip()
+        isbn = input(f"🔢 ISBN [{self._decode_string(book[3])}]: ").strip()
         if not isbn:
             isbn = self._decode_string(book[3])
 
-        year_input = input(f"ปีที่พิมพ์ [{self._decode_string(book[4])}]: ").strip()
+        year_input = input(f"📅 ปีที่พิมพ์ [{self._decode_string(book[4])}]: ").strip()
         if year_input:
             try:
                 year = int(year_input)
                 if year < 1000 or year > 9999:
                     raise ValueError()
             except ValueError:
-                print("ปีที่พิมพ์ต้องเป็นตัวเลข 4 หลัก")
+                print("\n❌ ปีที่พิมพ์ต้องเป็นตัวเลข 4 หลัก (1000-9999)")
                 return
         else:
             year = int(self._decode_string(book[4]))
@@ -430,17 +540,32 @@ class LibrarySystem:
             current_quantity_int = 1  # fallback for old records
             current_quantity = "1"
 
-        quantity_input = input(f"จำนวนหนังสือ (เล่ม) [{current_quantity}]: ").strip()
+        quantity_input = input(f"📚 จำนวนหนังสือ (เล่ม) [{current_quantity}]: ").strip()
         if quantity_input:
             try:
                 quantity = int(quantity_input)
                 if quantity < 1 or quantity > 9999:
                     raise ValueError()
             except ValueError:
-                print("จำนวนหนังสือต้องเป็นตัวเลข 1-9999 เล่ม")
+                print("\n❌ จำนวนหนังสือต้องเป็นตัวเลข 1-9999 เล่ม")
                 return
         else:
             quantity = current_quantity_int
+
+        # แสดงข้อมูลที่จะบันทึก
+        print("\n" + "─" * 60)
+        print("📋 ข้อมูลที่จะบันทึก:")
+        print("─" * 60)
+        print(f"📖 ชื่อหนังสือ: {title}")
+        print(f"✍️  ผู้แต่ง: {author}")
+        print(f"🔢 ISBN: {isbn}")
+        print(f"📅 ปีที่พิมพ์: {year}")
+        print(f"📚 จำนวนหนังสือ: {quantity} เล่ม")
+        
+        confirm = input("\n❓ ยืนยันการแก้ไขข้อมูล? (y/N): ").strip().lower()
+        if confirm != 'y':
+            print("\n❌ ยกเลิกการแก้ไข")
+            return
 
         updated_book = struct.pack(
             self.book_format,
@@ -455,29 +580,42 @@ class LibrarySystem:
         )
 
         self._update_record(self.books_file, book_index, updated_book, self.book_size)
-        print("แก้ไขข้อมูลหนังสือเรียบร้อย")
+        print("\n✅ แก้ไขข้อมูลหนังสือเรียบร้อย!")
+        print(f"📝 บันทึกการดำเนินการ: แก้ไขหนังสือ ID: {book_id}")
         self.operation_history.append(f"{datetime.datetime.now()}: แก้ไขหนังสือ ID: {book_id}")
 
     def delete_book(self):
-        print("\n=== ลบหนังสือ ===")
-        book_id = input("กรอก ID หนังสือที่ต้องการลบ: ").strip()
+        print("\n" + "=" * 60)
+        print(" " * 20 + "🗑️ ลบหนังสือ 🗑️")
+        print("=" * 60)
+        
+        book_id = input("\n🔍 กรอก ID หนังสือที่ต้องการลบ: ").strip()
+        
+        if not book_id:
+            print("❌ กรุณากรอก ID หนังสือ")
+            return
 
         book_index = self._find_book_index_by_id(book_id)
         if book_index == -1:
-            print("ไม่พบหนังสือ")
+            print(f"\n❌ ไม่พบหนังสือ ID: {book_id}")
+            print("💡 กรุณาตรวจสอบ ID และลองใหม่")
             return
 
         book = self._get_book_by_index(book_index)
         if not book:
-            print("เกิดข้อผิดพลาดในการอ่านข้อมูล")
+            print("\n❌ เกิดข้อผิดพลาดในการอ่านข้อมูล")
             return
 
-        print("ข้อมูลหนังสือที่จะลบ:")
+        print("\n⚠️ ข้อมูลหนังสือที่จะลบ:")
         self._display_book(book)
 
-        confirm = input("ยืนยันการลบ? (y/N): ").strip().lower()
+        print("\n" + "─" * 60)
+        print("⚠️ คำเตือน: การลบหนังสือจะไม่สามารถกู้คืนได้!")
+        print("─" * 60)
+        
+        confirm = input("\n❓ ยืนยันการลบหนังสือ? (y/N): ").strip().lower()
         if confirm != 'y':
-            print("ยกเลิกการลบ")
+            print("\n❌ ยกเลิกการลบหนังสือ")
             return
 
         deleted_book = struct.pack(
@@ -487,7 +625,11 @@ class LibrarySystem:
         )
 
         self._update_record(self.books_file, book_index, deleted_book, self.book_size)
-        print("ลบหนังสือเรียบร้อย")
+        print("\n✅ ลบหนังสือเรียบร้อย!")
+        print("─" * 60)
+        print(f"🆔 ID: {book_id}")
+        print(f"📖 ชื่อหนังสือ: {self._decode_string(book[1])}")
+        print(f"📝 บันทึกการดำเนินการ: ลบหนังสือ ID: {book_id}")
         self.operation_history.append(f"{datetime.datetime.now()}: ลบหนังสือ ID: {book_id}")
 
     def _find_book_index_by_id(self, book_id: str) -> int:
@@ -532,18 +674,39 @@ class LibrarySystem:
 
     # === MEMBERS MANAGEMENT ===
     def add_member(self):
-        print("\n=== เพิ่มสมาชิก ===")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "👤 เพิ่มสมาชิกใหม่ 👤")
+        print("=" * 60)
+        
+        print("\n📝 กรุณากรอกข้อมูลสมาชิก")
+        print("─" * 60)
+        
         try:
-            name = input("ชื่อ-นามสกุล: ").strip()
+            name = input("\n👤 ชื่อ-นามสกุล: ").strip()
             if not name:
-                print("กรุณากรอกชื่อ-นามสกุล")
+                print("❌ กรุณากรอกชื่อ-นามสกุล")
                 return
 
-            email = input("อีเมล: ").strip()
-            phone = input("โทรศัพท์: ").strip()
+            email = input("📧 อีเมล: ").strip()
+            phone = input("📱 โทรศัพท์: ").strip()
 
             member_id = self._get_next_id(self.members_file, self.member_size)
             join_date = datetime.date.today().strftime("%Y-%m-%d")
+
+            # แสดงข้อมูลที่จะบันทึก
+            print("\n" + "─" * 60)
+            print("📋 ข้อมูลที่จะบันทึก:")
+            print("─" * 60)
+            print(f"👤 ชื่อ-นามสกุล: {name}")
+            print(f"📧 อีเมล: {email}")
+            print(f"📱 โทรศัพท์: {phone}")
+            print(f"📅 วันที่สมัคร: {join_date}")
+            print(f"🆔 ID สมาชิก: {member_id}")
+            
+            confirm = input("\n❓ ยืนยันการเพิ่มสมาชิก? (y/N): ").strip().lower()
+            if confirm != 'y':
+                print("\n❌ ยกเลิกการเพิ่มสมาชิก")
+                return
 
             member_data = struct.pack(
                 self.member_format,
@@ -559,19 +722,28 @@ class LibrarySystem:
             with open(self.members_file, 'ab') as f:
                 f.write(member_data)
 
-            print(f"เพิ่มสมาชิกเรียบร้อย ID: {member_id}")
+            print("\n✅ เพิ่มสมาชิกเรียบร้อย!")
+            print("─" * 60)
+            print(f"🆔 ID: {member_id}")
+            print(f"👤 ชื่อ-นามสกุล: {name}")
+            print(f"📅 วันที่สมัคร: {join_date}")
+            print(f"📝 บันทึกการดำเนินการ: เพิ่มสมาชิก '{name}' ID: {member_id}")
             self.operation_history.append(f"{datetime.datetime.now()}: เพิ่มสมาชิก '{name}' ID: {member_id}")
 
         except Exception as e:
-            print(f"เกิดข้อผิดพลาด: {e}")
+            print(f"\n❌ เกิดข้อผิดพลาด: {e}")
 
     def view_members(self):
-        print("\n=== ดูข้อมูลสมาชิก ===")
-        print("1. ดูสมาชิกคนเดียว")
-        print("2. ดูสมาชิกทั้งหมด")
-        print("3. ดูสมาชิกแบบกรอง")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "👥 ดูข้อมูลสมาชิก 👥")
+        print("=" * 60)
+        print("\n📋 เลือกประเภทการดูข้อมูล:")
+        print("─" * 60)
+        print("1. 👤 ดูสมาชิกคนเดียว")
+        print("2. 📊 ดูสมาชิกทั้งหมด")
+        print("3. 🔍 ดูสมาชิกแบบกรอง")
 
-        choice = input("เลือก (1-3): ").strip()
+        choice = input("\n❓ เลือก (1-3): ").strip()
 
         if choice == '1':
             self._view_single_member()
@@ -579,37 +751,70 @@ class LibrarySystem:
             self._view_all_members()
         elif choice == '3':
             self._view_filtered_members()
+        else:
+            print("\n❌ กรุณาเลือกตัวเลือกที่ถูกต้อง (1-3)")
 
     def _view_single_member(self):
-        member_id = input("กรอก ID สมาชิก: ").strip()
+        print("\n" + "─" * 60)
+        print("👤 ดูข้อมูลสมาชิกคนเดียว")
+        print("─" * 60)
+        
+        member_id = input("\n🔍 กรอก ID สมาชิก: ").strip()
+        
+        if not member_id:
+            print("❌ กรุณากรอก ID สมาชิก")
+            return
+            
         member = self._find_member_by_id(member_id)
 
         if member:
+            print("\n📋 ข้อมูลสมาชิก:")
             self._display_member(member)
         else:
-            print("ไม่พบสมาชิก")
+            print(f"\n❌ ไม่พบสมาชิก ID: {member_id}")
+            print("💡 กรุณาตรวจสอบ ID และลองใหม่")
 
     def _view_all_members(self):
+        print("\n" + "─" * 60)
+        print("📊 ดูข้อมูลสมาชิกทั้งหมด")
+        print("─" * 60)
+        
         members = self._get_all_members()
         active_members = [member for member in members if member[6] == b'0']
 
         if not active_members:
-            print("ไม่มีสมาชิกในระบบ")
+            print("\n📭 ไม่มีสมาชิกในระบบ")
             return
 
-        print(f"\nมีสมาชิกทั้งหมด {len(active_members)} คน")
-        print("-" * 80)
-
-        for member in active_members:
-            self._display_member(member, compact=True)
+        print(f"\n📈 สรุปข้อมูล:")
+        print(f"👥 จำนวนสมาชิกทั้งหมด: {len(active_members)} คน")
+        print("─" * 80)
+        print(f"{'ลำดับ':<4} | {'ID':<6} | {'ชื่อ-นามสกุล':<25} | {'อีเมล':<30} | {'สถานะ':<15}")
+        print("─" * 80)
+        
+        for idx, member in enumerate(active_members, 1):
+            self._display_member(member, compact=True, sequence=idx)
 
     def _view_filtered_members(self):
-        print("กรองตาม:")
-        print("1. ชื่อ")
-        print("2. อีเมล")
+        print("\n" + "─" * 60)
+        print("🔍 ดูข้อมูลสมาชิกแบบกรอง")
+        print("─" * 60)
+        
+        print("\n📋 เลือกประเภทการกรอง:")
+        print("1. 👤 ชื่อ-นามสกุล")
+        print("2. 📧 อีเมล")
 
-        filter_choice = input("เลือก (1-2): ").strip()
-        keyword = input("คำค้นหา: ").strip().lower()
+        filter_choice = input("\n❓ เลือก (1-2): ").strip()
+        
+        if filter_choice not in ['1', '2']:
+            print("\n❌ กรุณาเลือกตัวเลือกที่ถูกต้อง (1-2)")
+            return
+            
+        keyword = input("🔍 คำค้นหา: ").strip().lower()
+        
+        if not keyword:
+            print("❌ กรุณากรอกคำค้นหา")
+            return
 
         members = self._get_all_members()
         active_members = [member for member in members if member[6] == b'0']
@@ -622,12 +827,15 @@ class LibrarySystem:
                 filtered_members.append(member)
 
         if filtered_members:
-            print(f"\nพบสมาชิก {len(filtered_members)} คน")
-            print("-" * 80)
-            for member in filtered_members:
-                self._display_member(member, compact=True)
+            print(f"\n✅ พบสมาชิก {len(filtered_members)} คน")
+            print("─" * 80)
+            print(f"{'ลำดับ':<4} | {'ID':<6} | {'ชื่อ-นามสกุล':<25} | {'อีเมล':<30} | {'สถานะ':<15}")
+            print("─" * 80)
+            for idx, member in enumerate(filtered_members, 1):
+                self._display_member(member, compact=True, sequence=idx)
         else:
-            print("ไม่พบสมาชิกที่ตรงกับเงื่อนไข")
+            print(f"\n❌ ไม่พบสมาชิกที่ตรงกับเงื่อนไข: '{keyword}'")
+            print("💡 ลองใช้คำค้นหาอื่น หรือตรวจสอบการสะกด")
 
     def _find_member_by_id(self, member_id: str):
         members = self._get_all_members()
@@ -649,7 +857,7 @@ class LibrarySystem:
                 members.append(member)
         return members
 
-    def _display_member(self, member, compact=False):
+    def _display_member(self, member, compact=False, sequence=None):
         member_id = self._decode_string(member[0])
         name = self._decode_string(member[1])
         email = self._decode_string(member[2])
@@ -664,15 +872,21 @@ class LibrarySystem:
             status = 'ระงับ'
 
         if compact:
-            print(f"ID: {member_id} | {name[:25]:<25} | {email[:30]:<30} | {status}")
+            if sequence:
+                print(f"{sequence:<4} | {member_id:<6} | {name[:25]:<25} | {email[:30]:<30} | {status:<15}")
+            else:
+                print(f"ID: {member_id} | {name[:25]:<25} | {email[:30]:<30} | {status}")
         else:
-            print(f"ID: {member_id}")
-            print(f"ชื่อ: {name}")
-            print(f"อีเมล: {email}")
-            print(f"โทรศัพท์: {phone}")
-            print(f"วันที่สมัคร: {join_date}")
-            print(f"สถานะ: {status}")
-            print("-" * 50)
+            print("┌" + "─" * 50 + "┐")
+            print(f"│ {'ข้อมูลสมาชิก':^48} │")
+            print("├" + "─" * 50 + "┤")
+            print(f"│ ID: {member_id:<44} │")
+            print(f"│ ชื่อ-นามสกุล: {name[:38]:<38} │")
+            print(f"│ อีเมล: {email[:41]:<41} │")
+            print(f"│ โทรศัพท์: {phone[:39]:<39} │")
+            print(f"│ วันที่สมัคร: {join_date:<36} │")
+            print(f"│ สถานะ: {status:<42} │")
+            print("└" + "─" * 50 + "┘")
 
     def update_member(self):
         print("\n=== แก้ไขสมาชิก ===")
@@ -781,80 +995,105 @@ class LibrarySystem:
 
     # === BORROW MANAGEMENT ===
     def add_borrow(self):
-        print("\n=== ยืมหนังสือ ===")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "📚 ยืมหนังสือ 📚")
+        print("=" * 60)
+        
         banned_list = self._check_and_ban_overdue_members()
         if banned_list:
-            print(f"⚠️  ระบบได้แบนสมาชิก {len(banned_list)} คนที่เกินกำหนดคืนหนังสือ")
+            print(f"\n⚠️  ระบบได้แบนสมาชิก {len(banned_list)} คนที่เกินกำหนดคืนหนังสือ")
 
         try:
-            member_id = input("\nกรอก ID สมาชิก: ").strip()
+            member_id = input("\n🔍 กรอก ID สมาชิก: ").strip()
+            
+            if not member_id:
+                print("❌ กรุณากรอก ID สมาชิก")
+                return
 
             member = self._find_member_by_id(member_id)
             if not member:
-                print("ไม่พบสมาชิก")
+                print(f"\n❌ ไม่พบสมาชิก ID: {member_id}")
+                print("💡 กรุณาตรวจสอบ ID และลองใหม่")
                 return
 
             if member[5] == b'S':
-                print("=" * 60)
+                print("\n" + "=" * 60)
                 print("🚫 สมาชิกถูกแบน!")
                 print("=" * 60)
-                print(f"สมาชิก: {self._decode_string(member[1])} (ID: {member_id})")
-                print("สาเหตุ: เกินกำหนดคืนหนังสือ")
+                print(f"👤 สมาชิก: {self._decode_string(member[1])} (ID: {member_id})")
+                print("📋 สาเหตุ: เกินกำหนดคืนหนังสือ")
                 print("\n⚠️  กรุณาคืนหนังสือที่ค้างอยู่ก่อน จึงจะสามารถยืมหนังสือใหม่ได้")
                 print("=" * 60)
                 return
 
-            print(f"\n✓ ผู้ยืม: {self._decode_string(member[1])} (ID: {member_id})")
-            print("-" * 60)
+            print(f"\n✅ ผู้ยืม: {self._decode_string(member[1])} (ID: {member_id})")
+            print("─" * 60)
 
             # แสดงรายการหนังสือที่มีให้ยืม
             available_books = self._get_available_books_for_borrow()
             if not available_books:
-                print("ไม่มีหนังสือให้ยืมในขณะนี้")
+                print("\n📭 ไม่มีหนังสือให้ยืมในขณะนี้")
                 return
 
             print("\n📚 รายการหนังสือที่มีให้ยืม:")
-            print("-" * 90)
+            print("─" * 90)
             print(f"{'ลำดับ':<4} | {'ชื่อหนังสือ':<30} | {'ผู้แต่ง':<20} | {'จำนวนรวม':<8} | {'ว่าง':<6}")
-            print("-" * 90)
+            print("─" * 90)
 
             for idx, (book_id, title, author, available_quantity, total_quantity, borrowed_quantity) in enumerate(available_books, 1):
                 print(f"{idx:<4} | {title:<30} | {author:<20} | {total_quantity} เล่ม | {available_quantity} เล่ม")
 
             # เลือกหนังสือ
-            print("\nเลือกหนังสือที่ต้องการยืม:")
-            choice = input("กรอกลำดับหนังสือ (1-{}): ".format(len(available_books))).strip()
+            print("\n" + "─" * 60)
+            print("📖 เลือกหนังสือที่ต้องการยืม")
+            print("─" * 60)
+            choice = input(f"❓ กรอกลำดับหนังสือ (1-{len(available_books)}): ").strip()
 
             try:
                 choice_idx = int(choice) - 1
                 if choice_idx < 0 or choice_idx >= len(available_books):
-                    print("กรุณาเลือกลำดับที่ถูกต้อง")
+                    print("\n❌ กรุณาเลือกลำดับที่ถูกต้อง")
                     return
             except ValueError:
-                print("กรุณากรอกตัวเลขที่ถูกต้อง")
+                print("\n❌ กรุณากรอกตัวเลขที่ถูกต้อง")
                 return
 
             selected_book_id, selected_title, selected_author, available_quantity, total_quantity, borrowed_quantity = available_books[choice_idx]
             
-            print(f"\n✓ เลือกหนังสือ: {selected_title}")
-            print(f"  ผู้แต่ง: {selected_author}")
-            print(f"  จำนวนรวม: {total_quantity} เล่ม")
-            print(f"  ยืมแล้ว: {borrowed_quantity} เล่ม")
-            print(f"  จำนวนที่ว่างให้ยืม: {available_quantity} เล่ม")
+            print(f"\n✅ เลือกหนังสือ: {selected_title}")
+            print(f"✍️  ผู้แต่ง: {selected_author}")
+            print(f"📚 จำนวนรวม: {total_quantity} เล่ม")
+            print(f"📖 ยืมแล้ว: {borrowed_quantity} เล่ม")
+            print(f"📋 จำนวนที่ว่างให้ยืม: {available_quantity} เล่ม")
 
             # เลือกจำนวนที่จะยืม
             max_borrow = min(3, available_quantity)  # ยืมได้มากสุด 3 เล่ม หรือจำนวนที่ว่าง
-            print(f"\nสามารถยืมได้มากสุด {max_borrow} เล่ม")
+            print(f"\n📊 สามารถยืมได้มากสุด {max_borrow} เล่ม")
 
-            quantity_input = input(f"ต้องการยืมกี่เล่ม? (1-{max_borrow}): ").strip()
+            quantity_input = input(f"❓ ต้องการยืมกี่เล่ม? (1-{max_borrow}): ").strip()
 
             try:
                 borrow_quantity = int(quantity_input)
                 if borrow_quantity < 1 or borrow_quantity > max_borrow:
-                    print(f"กรุณากรอกจำนวน 1-{max_borrow} เล่มเท่านั้น")
+                    print(f"\n❌ กรุณากรอกจำนวน 1-{max_borrow} เล่มเท่านั้น")
                     return
             except ValueError:
-                print("กรุณากรอกตัวเลขที่ถูกต้อง")
+                print("\n❌ กรุณากรอกตัวเลขที่ถูกต้อง")
+                return
+
+            # แสดงข้อมูลที่จะยืม
+            print("\n" + "─" * 60)
+            print("📋 ข้อมูลที่จะยืม:")
+            print("─" * 60)
+            print(f"👤 ผู้ยืม: {self._decode_string(member[1])}")
+            print(f"🆔 ID สมาชิก: {member_id}")
+            print(f"📖 หนังสือ: {selected_title}")
+            print(f"✍️  ผู้แต่ง: {selected_author}")
+            print(f"📚 จำนวนที่ยืม: {borrow_quantity} เล่ม")
+            
+            confirm = input("\n❓ ยืนยันการยืมหนังสือ? (y/N): ").strip().lower()
+            if confirm != 'y':
+                print("\n❌ ยกเลิกการยืมหนังสือ")
                 return
 
             # ทำการยืม
@@ -883,15 +1122,15 @@ class LibrarySystem:
                 with open(self.borrows_file, 'ab') as f:
                     f.write(borrow_data)
 
-                print("\n" + "=" * 60)
-                print("📚 สรุปการยืมหนังสือ")
-                print("=" * 60)
-                print(f"ผู้ยืม: {self._decode_string(member[1])}")
-                print(f"ID สมาชิก: {member_id}")
-            print(f"หนังสือ: {selected_title}")
-            print(f"ผู้แต่ง: {selected_author}")
-            print(f"จำนวนที่ยืม: {borrow_quantity} เล่ม")
-            print(f"วันที่ยืม: {borrow_date_str}")
+            print("\n" + "=" * 60)
+            print("✅ ยืมหนังสือสำเร็จ!")
+            print("=" * 60)
+            print(f"👤 ผู้ยืม: {self._decode_string(member[1])}")
+            print(f"🆔 ID สมาชิก: {member_id}")
+            print(f"📖 หนังสือ: {selected_title}")
+            print(f"✍️  ผู้แต่ง: {selected_author}")
+            print(f"📚 จำนวนที่ยืม: {borrow_quantity} เล่ม")
+            print(f"📅 วันที่ยืม: {borrow_date_str}")
             print(f"⏰ กำหนดคืน: {due_date_str}")
             
             print(f"\n📋 รายการยืม:")
@@ -910,7 +1149,7 @@ class LibrarySystem:
             )
 
         except Exception as e:
-            print(f"เกิดข้อผิดพลาด: {e}")
+            print(f"\n❌ เกิดข้อผิดพลาด: {e}")
 
     def return_book(self):
         print("\n=== คืนหนังสือ ===")
@@ -937,7 +1176,7 @@ class LibrarySystem:
 
             print(f"\n📚 รายการหนังสือที่ยืมอยู่ของ: {self._decode_string(member[1])}")
             print("-" * 100)
-            print(f"{'ลำดับ':<4} | {'ชื่อหนังสือ':<30} | {'จำนวน':<8} | {'วันที่ยืม':<12} | {'กำหนดคืน':<12}")
+            print(f"{'ลำดับ':<4} | {'ชื่อหนังสือ':<34} | {'จำนวน':<9} | {'วันที่ยืม':<16} | {'กำหนดคืน':<12}")
             print("-" * 100)
 
             book_list = []
@@ -948,7 +1187,7 @@ class LibrarySystem:
                 borrow_date_str = borrow_list[0][1]  # ใช้วันที่ยืมของเล่มแรก
                 
                 book_list.append((book_id, borrow_list, book_title))
-                print(f"{idx:<4} | {book_title:<30} | {borrow_count} เล่ม | {borrow_date_str:<12} | {borrow_date_str:<12}")
+                print(f"{idx:<4} | {book_title:<30} | {borrow_count:>5} เล่ม | {borrow_date_str:<12} | {borrow_date_str:<12}")
 
             # เลือกหนังสือที่จะคืน
             print("\nเลือกหนังสือที่จะคืน:")
@@ -1621,9 +1860,9 @@ class LibrarySystem:
 
             # Borrow Records Table
             report_content.append("Borrow Records")
-            report_content.append("-" * 135)
-            report_content.append("| ID    | Name     | Phone        | Email              | Title              | copies | Borrow Date | Return Date | Status    | Banned |")
-            report_content.append("-" * 135)
+            report_content.append("-" * 123)
+            report_content.append("| ID    | Name     | Phone        | Email              | Title           | Borrow Date | Return Date | Status    | Banned |")
+            report_content.append("-" * 123)
 
             # Display individual borrow records (not grouped)
             for borrow in active_borrows:
@@ -1649,7 +1888,7 @@ class LibrarySystem:
                     banned_status = "yes" if member[5] == b'S' else "no"
                     
                     # Format the line to match the table structure
-                    line = f"{member_id:<4} | {member_name[:8]:<8} | {member_phone:<12} | {member_email[:18]:<18} | {book_title[:18]:<18} | {book_quantity:<6} | {borrow_date_str:<11} | {return_date_str:<11} | {status:<9} | {banned_status}"
+                    line = f"{member_id:<4} | {member_name[:8]:<8} | {member_phone:<12} | {member_email[:18]:<18} | {book_title[:18]:<18} | {borrow_date_str:<11} | {return_date_str:<11} | {status:<9} | {banned_status}"
                     report_content.append(line)
 
             report_content.append("")
@@ -1716,48 +1955,66 @@ class LibrarySystem:
 
     # === MAIN MENU ===
     def show_main_menu(self):
-        print("\n" + "=" * 60)
-        print("ระบบจัดการห้องสมุด (Library Management System) v1.0")
-        print("=" * 60)
-        print("1. จัดการหนังสือ (Books)")
-        print("2. จัดการสมาชิก (Members)")
-        print("3. จัดการการยืม-คืน (Borrow/Return)")
-        print("4. ดูสถิติโดยสรุป (Statistics)")
-        print("5. สร้างรายงาน (Generate Report)")
-        print("0. ออกจากระบบ (Exit)")
-        print("-" * 60)
+        print("\n" + "=" * 70)
+        print(" " * 25 + "🏛️ ระบบจัดการห้องสมุด 🏛️")
+        print(" " * 20 + "Library Management System v1.0")
+        print("=" * 70)
+        print("\n📋 เมนูหลัก:")
+        print(" ")
+        print("─" * 70)
+        print("1. 📚 จัดการหนังสือ (Books Management)")
+        print("2. 👥 จัดการสมาชิก (Members Management)")
+        print("3. 📖 จัดการการยืม-คืน (Borrow/Return Management)")
+        print("4. 📊 ดูสถิติโดยสรุป (Statistics)")
+        print("5. 📄 สร้างรายงาน (Generate Report)")
+        print("0. 🚪 ออกจากระบบ (Exit)")
+        print("─" * 70)
 
     def show_book_menu(self):
-        print("\n --- เมนูจัดการหนังสือ ---")
-        print("1. เพิ่มหนังสือ (Add)")
-        print("2. ดูข้อมูลหนังสือ (View)")
-        print("3. แก้ไขหนังสือ (Update)")
-        print("4. ลบหนังสือ (Delete)")
-        print("0. กลับเมนูหลัก")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "📚 เมนูจัดการหนังสือ 📚")
+        print("=" * 60)
+        print("\n📋 เลือกการดำเนินการ:")
+        print("─" * 60)
+        print("1. ➕ เพิ่มหนังสือ (Add Book)")
+        print("2. 👁️  ดูข้อมูลหนังสือ (View Books)")
+        print("3. ✏️  แก้ไขหนังสือ (Update Book)")
+        print("4. 🗑️ ลบหนังสือ (Delete Book)")
+        print("0. 🔙 กลับเมนูหลัก")
+        print("─" * 60)
 
     def show_member_menu(self):
-        print("\n --- เมนูจัดการสมาชิก ---")
-        print("1. เพิ่มสมาชิก (Add)")
-        print("2. ดูข้อมูลสมาชิก (View)")
-        print("3. แก้ไขสมาชิก (Update)")
-        print("4. ลบสมาชิก (Delete)")
-        print("0. กลับเมนูหลัก")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "👥 เมนูจัดการสมาชิก 👥")
+        print("=" * 60)
+        print("\n📋 เลือกการดำเนินการ:")
+        print("─" * 60)
+        print("1. ➕ เพิ่มสมาชิก (Add Member)")
+        print("2. 👁️  ดูข้อมูลสมาชิก (View Members)")
+        print("3. ✏️  แก้ไขสมาชิก (Update Member)")
+        print("4. 🗑️ ลบสมาชิก (Delete Member)")
+        print("0. 🔙 กลับเมนูหลัก")
+        print("─" * 60)
 
     def show_borrow_menu(self):
-        print("\n --- เมนูจัดการการยืม-คืน ---")
-        print("1. ยืมหนังสือ (Borrow)")
-        print("2. คืนหนังสือ (Return)")
-        print("3. ดูรายการยืม (View Borrows)")
-        print("4. ลบรายการยืม (Delete Borrow)")
-        print("0. กลับเมนูหลัก")
+        print("\n" + "=" * 60)
+        print(" " * 20 + "📖 เมนูจัดการการยืม-คืน 📖")
+        print("=" * 60)
+        print("\n📋 เลือกการดำเนินการ:")
+        print("─" * 60)
+        print("1. 📚 ยืมหนังสือ (Borrow Book)")
+        print("2. 🔄 คืนหนังสือ (Return Book)")
+        print("3. 👁️  ดูรายการยืม (View Borrows)")
+        print("4. 🗑️ ลบรายการยืม (Delete Borrow)")
+        print("0. 🔙 กลับเมนูหลัก")
+        print("─" * 60)
 
     def run(self):
-        print("ยินดีต้อนรับสู่ระบบจัดการห้องสมุด!")
 
         while True:
             try:
                 self.show_main_menu()
-                choice = input("เลือกเมนู (0-5): ").strip()
+                choice = input("\n❓ เลือกเมนู (0-5): ").strip()
 
                 if choice == '1':
                     self._handle_book_menu()
@@ -1770,21 +2027,27 @@ class LibrarySystem:
                 elif choice == '5':
                     self.generate_report()
                 elif choice == '0':
-                    print("ขอบคุณที่ใช้บริการ!")
+                    print("\n" + "=" * 60)
+                    print(" " * 20 + "🙏 ขอบคุณที่ใช้บริการ! 🙏")
+                    print(" " * 15 + "Thank you for using our service!")
+                    print("=" * 60)
                     break
                 else:
-                    print("กรุณาเลือกเมนูที่ถูกต้อง")
+                    print("\n❌ กรุณาเลือกเมนูที่ถูกต้อง (0-5)")
+                    input("กด Enter เพื่อดำเนินการต่อ...")
 
             except KeyboardInterrupt:
-                print("\n\nระบบถูกปิดโดยผู้ใช้")
+                print("\n\n⚠️ ระบบถูกปิดโดยผู้ใช้")
+                print("🙏 ขอบคุณที่ใช้บริการ!")
                 break
             except Exception as e:
-                print(f"เกิดข้อผิดพลาด: {e}")
+                print(f"\n❌ เกิดข้อผิดพลาด: {e}")
+                input("กด Enter เพื่อดำเนินการต่อ...")
 
     def _handle_book_menu(self):
         while True:
             self.show_book_menu()
-            choice = input("เลือก (0-4): ").strip()
+            choice = input("\n❓ เลือก (0-4): ").strip()
 
             if choice == '1':
                 self.add_book()
@@ -1797,12 +2060,13 @@ class LibrarySystem:
             elif choice == '0':
                 break
             else:
-                print("กรุณาเลือกเมนูที่ถูกต้อง")
+                print("\n❌ กรุณาเลือกเมนูที่ถูกต้อง (0-4)")
+                input("กด Enter เพื่อดำเนินการต่อ...")
 
     def _handle_member_menu(self):
         while True:
             self.show_member_menu()
-            choice = input("เลือก (0-4): ").strip()
+            choice = input("\n❓ เลือก (0-4): ").strip()
 
             if choice == '1':
                 self.add_member()
@@ -1815,12 +2079,13 @@ class LibrarySystem:
             elif choice == '0':
                 break
             else:
-                print("กรุณาเลือกเมนูที่ถูกต้อง")
+                print("\n❌ กรุณาเลือกเมนูที่ถูกต้อง (0-4)")
+                input("กด Enter เพื่อดำเนินการต่อ...")
 
     def _handle_borrow_menu(self):
         while True:
             self.show_borrow_menu()
-            choice = input("เลือก (0-4): ").strip()
+            choice = input("\n❓ เลือก (0-4): ").strip()
 
             if choice == '1':
                 self.add_borrow()
@@ -1833,5 +2098,6 @@ class LibrarySystem:
             elif choice == '0':
                 break
             else:
-                print("กรุณาเลือกเมนูที่ถูกต้อง")
+                print("\n❌ กรุณาเลือกเมนูที่ถูกต้อง (0-4)")
+                input("กด Enter เพื่อดำเนินการต่อ...")
 
